@@ -1,0 +1,3064 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SHC · SHI Delegate Dashboard — JJ & JJ2</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+/* ═══════════════════════════════════════
+   SHI MONITORING THEME — Dark Navy + Lime
+   Inspired by: SHI 비관계사·서브원 통합 모니터링
+═══════════════════════════════════════ */
+:root {
+  /* Core brand */
+  --shc-primary:  #5431E4;
+  --shc-dark:     #030050;
+  --shc-medium:   #0A0A2E;
+  --shc-navy:     #0D0D3A;
+  --shc-accent:   #C0FF45;
+  --shc-accent2:  #A8E832;
+  --shc-light:    #856AEA;
+  --shc-lighter:  #DFDEF4;
+  --shc-surface:  #F4F3FD;
+
+  /* Monitoring theme (reference image) */
+  --mon-bg:       #F0F2F5;
+  --mon-card:     #FFFFFF;
+  --mon-border:   #E2E8F0;
+  --mon-header:   #1B2559;
+  --mon-header2:  #111C44;
+  --mon-blue:     #2B3674;
+  --mon-text:     #1B2559;
+  --mon-muted:    #A3AED0;
+  --mon-green:    #05CD44;
+  --mon-red:      #E31A1A;
+  --mon-orange:   #FF7B00;
+  --mon-amber:    #FFCB45;
+
+  /* Status colors */
+  --c-ok:    #05CD44;
+  --c-warn:  #FFCB45;
+  --c-bad:   #E31A1A;
+  --c-info:  #4299E1;
+
+  /* Text */
+  --txt-primary:   #1B2559;
+  --txt-secondary: #2B3674;
+  --txt-muted:     #A3AED0;
+  --txt-white:     #FFFFFF;
+
+  /* UI */
+  --border:       #E2E8F0;
+  --border-light: #EEF2F6;
+  --bg-page:      #F0F2F5;
+  --bg-card:      #FFFFFF;
+  --radius-card:  16px;
+  --radius-sm:    10px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  background: var(--bg-page);
+  color: var(--txt-primary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ═══════════ SCROLLBAR ═══════════ */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(43,54,116,.2); border-radius: 10px; }
+
+/* ═══════════ LOGIN SCREEN — WHITE THEME ═══════════ */
+#login-screen {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 100vh;
+  background: #F8F9FF;
+  position: relative; overflow: hidden;
+}
+#login-screen::before {
+  content: '';
+  position: absolute; top: -120px; right: -120px;
+  width: 480px; height: 480px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(84,49,228,.06) 0%, transparent 70%);
+  pointer-events: none;
+}
+#login-screen::after {
+  content: '';
+  position: absolute; bottom: -120px; left: -120px;
+  width: 400px; height: 400px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(84,49,228,.05) 0%, transparent 70%);
+  pointer-events: none;
+}
+#login-screen .grid-bg {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(84,49,228,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(84,49,228,.04) 1px, transparent 1px);
+  background-size: 50px 50px;
+}
+.login-box {
+  background: #FFFFFF;
+  border: 1px solid rgba(84,49,228,.12);
+  border-radius: 24px;
+  padding: 52px 52px 44px; width: 440px; text-align: center;
+  position: relative; z-index: 1;
+  box-shadow: 0 20px 60px rgba(84,49,228,.1), 0 4px 20px rgba(0,0,0,.05);
+}
+.login-logo-wrap {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  margin-bottom: 8px;
+}
+.login-logo-mark {
+  display: flex; align-items: center; gap: 10px; justify-content: center;
+}
+.login-badge {
+  background: rgba(84,49,228,.08); border: 1px solid rgba(84,49,228,.18);
+  border-radius: 8px; padding: 4px 12px;
+  font-size: 10px; font-weight: 700; color: var(--shc-primary);
+  letter-spacing: .1em; text-transform: uppercase; margin-bottom: 12px;
+  display: inline-block;
+}
+.login-title { font-size: 22px; font-weight: 800; color: var(--txt-primary); margin-bottom: 6px; letter-spacing: -.02em; }
+.login-sub { font-size: 12px; color: var(--txt-muted); margin-bottom: 32px; }
+.login-lang-row { display: none; } /* Hidden on login — language switcher is inside app */
+.lang-btn {
+  padding: 5px 14px; border-radius: 20px; font-size: 11px; font-weight: 600;
+  border: 1px solid var(--border); background: var(--bg-page);
+  color: var(--txt-muted); cursor: pointer; transition: all .15s;
+  font-family: 'Pretendard', system-ui, sans-serif;
+}
+.lang-btn:hover { border-color: rgba(84,49,228,.3); color: var(--shc-primary); }
+.lang-btn.active { background: rgba(84,49,228,.1); border-color: rgba(84,49,228,.3); color: var(--shc-primary); }
+.login-divider { border: none; border-top: 1px solid var(--border); margin: 0 0 24px; }
+.login-box input[type=password] {
+  width: 100%; padding: 13px 16px;
+  border: 1px solid var(--border); border-radius: 12px;
+  font-size: 14px; background: var(--bg-page); color: var(--txt-primary); margin-bottom: 12px;
+  outline: none; font-family: 'Pretendard', system-ui, sans-serif;
+  transition: all .15s;
+}
+.login-box input::placeholder { color: var(--txt-muted); }
+.login-box input:focus { border-color: var(--shc-primary); background: #fff; box-shadow: 0 0 0 3px rgba(84,49,228,.1); }
+.login-btn-main {
+  width: 100%; padding: 14px;
+  background: var(--shc-primary); color: #fff;
+  border: none; border-radius: 12px; font-size: 14px; font-weight: 800;
+  cursor: pointer; font-family: 'Pretendard', system-ui, sans-serif;
+  transition: all .15s; letter-spacing: .02em;
+}
+.login-btn-main:hover { background: #4828d0; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(84,49,228,.35); }
+.login-view-link {
+  display: block; margin-top: 16px; font-size: 12px;
+  color: var(--txt-muted); cursor: pointer; transition: color .15s; text-decoration: none;
+}
+.login-view-link:hover { color: var(--shc-primary); }
+.login-err { color: var(--c-bad); font-size: 12px; margin-bottom: 10px; display: none; }
+
+/* ═══════════ APP SHELL ═══════════ */
+#app { display: none; min-height: 100vh; }
+
+/* ═══════════ SIDEBAR ═══════════ */
+.sidebar {
+  position: fixed; top: 0; left: 0; bottom: 0; width: 240px;
+  background: linear-gradient(180deg, #030050 0%, #0D0D3A 50%, #1B2559 100%);
+  border-right: 1px solid rgba(192,255,69,.08);
+  z-index: 200; display: flex; flex-direction: column;
+  box-shadow: 4px 0 32px rgba(3,0,80,.4);
+}
+.sidebar-logo {
+  padding: 20px 20px 16px;
+  display: flex; align-items: center; gap: 10px;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+.sidebar-app-label {
+  font-size: 10px; font-weight: 700; color: var(--shc-accent);
+  text-transform: uppercase; letter-spacing: .1em; margin-top: 1px;
+}
+.sidebar-nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
+.sidebar-section-label {
+  font-size: 9px; font-weight: 700; color: rgba(255,255,255,.25);
+  text-transform: uppercase; letter-spacing: .1em;
+  padding: 0 8px; margin: 16px 0 6px;
+}
+.sidebar-section-label:first-child { margin-top: 0; }
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px; border-radius: 10px; cursor: pointer;
+  color: rgba(255,255,255,.45); font-size: 13px; font-weight: 500;
+  border: none; background: none; width: 100%; text-align: left;
+  transition: all .15s; margin-bottom: 2px;
+}
+.nav-item:hover { background: rgba(255,255,255,.07); color: rgba(255,255,255,.8); }
+.nav-item.active {
+  background: rgba(192,255,69,.12);
+  color: var(--shc-accent);
+  border: 1px solid rgba(192,255,69,.2);
+}
+.nav-icon { width: 18px; height: 18px; flex-shrink: 0; opacity: .7; }
+.nav-item.active .nav-icon { opacity: 1; }
+.sidebar-footer {
+  padding: 16px; border-top: 1px solid rgba(255,255,255,.06);
+}
+.sidebar-user {
+  display: flex; align-items: center; gap: 10px; padding: 10px;
+  background: rgba(255,255,255,.05); border-radius: 10px;
+  border: 1px solid rgba(255,255,255,.08);
+}
+.user-avatar-sm {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: rgba(192,255,69,.2); border: 1px solid rgba(192,255,69,.3);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; color: var(--shc-accent); flex-shrink: 0;
+}
+.user-info-sm { flex: 1; min-width: 0; }
+.user-name-sm { font-size: 12px; font-weight: 600; color: rgba(255,255,255,.85); }
+.user-role-sm { font-size: 10px; color: rgba(255,255,255,.35); }
+.btn-logout-sm {
+  background: none; border: none; cursor: pointer; padding: 4px;
+  color: rgba(255,255,255,.3); transition: color .15s; flex-shrink: 0;
+}
+.btn-logout-sm:hover { color: rgba(255,255,255,.7); }
+
+/* ═══════════ MAIN CONTENT ═══════════ */
+.main-wrap { margin-left: 240px; min-height: 100vh; }
+.topbar {
+  background: rgba(255,255,255,.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 0 28px; height: 64px; display: flex; align-items: center;
+  justify-content: space-between; position: sticky; top: 0; z-index: 100;
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 1px 0 rgba(0,0,0,.04);
+}
+.topbar-title { font-size: 16px; font-weight: 700; color: var(--txt-primary); }
+.topbar-sub { font-size: 12px; color: var(--txt-muted); margin-top: 1px; }
+.topbar-right { display: flex; align-items: center; gap: 10px; }
+
+/* Language switcher in topbar */
+.lang-switcher-bar {
+  display: flex; gap: 4px; align-items: center;
+  background: var(--bg-page); border: 1px solid var(--border);
+  border-radius: 20px; padding: 3px;
+}
+.lang-pill {
+  padding: 4px 12px; border-radius: 16px; font-size: 11px; font-weight: 700;
+  border: none; background: none; cursor: pointer;
+  color: var(--txt-muted); transition: all .15s;
+  font-family: 'Pretendard', system-ui, sans-serif;
+  letter-spacing: .04em;
+}
+.lang-pill.active {
+  background: var(--mon-header); color: #fff;
+  box-shadow: 0 2px 6px rgba(27,37,89,.3);
+}
+.lang-pill:hover:not(.active) { color: var(--txt-primary); }
+
+.pic-badge {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(5,205,68,.1); color: #059669;
+  font-size: 11px; font-weight: 700; padding: 5px 12px;
+  border-radius: 20px; border: 1px solid rgba(5,205,68,.2);
+}
+.pic-dot-green { width: 6px; height: 6px; background: #05CD44; border-radius: 50%; }
+
+/* ═══════════ CONTENT ═══════════ */
+.content { padding: 24px 28px; }
+.page { display: none; }
+.page.active { display: block; }
+
+/* ═══════════ PAGE HEADER ═══════════ */
+.page-header {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  margin-bottom: 20px;
+}
+.page-header-title { font-size: 20px; font-weight: 800; color: var(--txt-primary); }
+.page-header-sub { font-size: 12px; color: var(--txt-muted); margin-top: 2px; }
+
+/* ═══════════ KPI STRIP — no icons ═══════════ */
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0; margin-bottom: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+.kpi-cell {
+  padding: 18px 20px;
+  border-right: 1px solid var(--border-light);
+  position: relative; overflow: hidden;
+}
+.kpi-cell:last-child { border-right: none; }
+.kpi-cell::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 3px;
+}
+.kpi-cell.accent-blue::before   { background: var(--shc-primary); }
+.kpi-cell.accent-red::before    { background: var(--c-bad); }
+.kpi-cell.accent-amber::before  { background: #FFCB45; }
+.kpi-cell.accent-green::before  { background: #05CD44; }
+.kpi-cell.accent-navy::before   { background: var(--mon-header); }
+.kpi-cell-label {
+  font-size: 10px; font-weight: 700; color: var(--txt-muted);
+  text-transform: uppercase; letter-spacing: .07em; margin-bottom: 6px;
+}
+.kpi-cell-num {
+  font-size: 32px; font-weight: 900; line-height: 1; letter-spacing: -.03em;
+  margin-bottom: 4px;
+}
+.kpi-cell-num.blue   { color: var(--shc-primary); }
+.kpi-cell-num.green  { color: #059669; }
+.kpi-cell-num.amber  { color: #D97706; }
+.kpi-cell-num.red    { color: var(--c-bad); }
+.kpi-cell-num.navy   { color: var(--mon-blue); }
+.kpi-cell-meta {
+  font-size: 11px; color: var(--txt-muted); line-height: 1.4;
+}
+.kpi-cell-bar {
+  margin-top: 10px; height: 4px; background: var(--border-light); border-radius: 4px; overflow: hidden;
+}
+.kpi-cell-bar-fill {
+  height: 100%; border-radius: 4px; transition: width .6s ease;
+}
+
+/* ─── OVERVIEW GRID LAYOUTS ─── */
+.ov-row-1 { display: grid; grid-template-columns: 1.8fr 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.ov-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.ov-row-3 { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px; }
+
+/* ─── SIGNAL ROW (attention items) ─── */
+.signal-row {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-card); padding: 14px 20px;
+  display: flex; align-items: center; gap: 0;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.signal-item {
+  flex: 1; display: flex; flex-direction: column; gap: 2px;
+  padding: 6px 18px; border-right: 1px solid var(--border-light);
+}
+.signal-item:first-child { padding-left: 0; }
+.signal-item:last-child { border-right: none; }
+.signal-label { font-size: 10px; font-weight: 700; color: var(--txt-muted); text-transform: uppercase; letter-spacing: .06em; }
+.signal-val { font-size: 15px; font-weight: 800; }
+.signal-desc { font-size: 11px; color: var(--txt-muted); }
+
+/* ─── SCORECARD GRID ─── */
+.scorecard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.scorecard {
+  background: var(--bg-page); border: 1px solid var(--border-light);
+  border-radius: 10px; padding: 14px;
+}
+.scorecard-label { font-size: 10px; font-weight: 700; color: var(--txt-muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+.scorecard-num { font-size: 22px; font-weight: 900; line-height: 1; letter-spacing: -.02em; }
+.scorecard-sub { font-size: 10px; color: var(--txt-muted); margin-top: 4px; }
+
+/* ─── ISSUE HEAT TABLE ─── */
+.issue-heat-table { width: 100%; border-collapse: collapse; }
+.issue-heat-table td, .issue-heat-table th {
+  padding: 7px 10px; font-size: 11px; border-bottom: 1px solid var(--border-light);
+}
+.issue-heat-table th { font-size: 9px; font-weight: 700; color: var(--txt-muted); text-transform: uppercase; letter-spacing: .07em; background: none; }
+.issue-heat-table tr:last-child td { border-bottom: none; }
+.heat-pill {
+  display: inline-block; font-size: 10px; font-weight: 700;
+  padding: 2px 8px; border-radius: 20px;
+}
+
+/* ─── TIMELINE / ACTIVITY FEED ─── */
+.feed-list { display: flex; flex-direction: column; }
+.feed-item {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 10px 0; border-bottom: 1px solid var(--border-light);
+}
+.feed-item:last-child { border-bottom: none; }
+.feed-date-col { width: 72px; flex-shrink: 0; text-align: right; }
+.feed-date-day { font-size: 11px; font-weight: 800; color: var(--txt-primary); line-height: 1.4; white-space: nowrap; }
+.feed-date-mon { font-size: 10px; color: var(--txt-muted); font-weight: 600; }
+.feed-line { width: 1px; background: var(--border-light); align-self: stretch; flex-shrink: 0; margin: 4px 0; }
+.feed-body { flex: 1; min-width: 0; }
+.feed-title { font-size: 12px; font-weight: 700; color: var(--txt-primary); margin-bottom: 2px; }
+.feed-sub { font-size: 11px; color: var(--txt-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.feed-count { font-size: 10px; font-weight: 800; padding: 2px 7px; border-radius: 20px; background: rgba(84,49,228,.1); color: var(--shc-primary); flex-shrink: 0; align-self: center; }
+
+/* ─── DEPT MATRIX ─── */
+.dept-matrix { display: flex; flex-direction: column; gap: 7px; }
+.dept-matrix-row { display: flex; align-items: center; gap: 10px; }
+.dept-matrix-name { width: 90px; font-size: 11px; font-weight: 600; color: var(--txt-secondary); flex-shrink: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dept-matrix-bars { flex: 1; display: flex; gap: 3px; }
+.dept-bar-seg { height: 16px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: rgba(255,255,255,.9); transition: flex .4s ease; }
+.dept-matrix-total { width: 22px; font-size: 11px; font-weight: 700; color: var(--txt-secondary); text-align: right; flex-shrink: 0; }
+
+/* ─── RESOLUTION METRIC ─── */
+.resolution-big { text-align: center; padding: 16px 0 10px; }
+.resolution-pct { font-size: 48px; font-weight: 900; letter-spacing: -.04em; }
+.resolution-label { font-size: 11px; color: var(--txt-muted); }
+.resolution-track { height: 10px; background: var(--border-light); border-radius: 10px; overflow: hidden; margin: 14px 0 10px; }
+.resolution-fill { height: 100%; border-radius: 10px; transition: width .7s ease; }
+.resolution-split { display: flex; justify-content: space-between; font-size: 11px; }
+
+/* ─── VENDOR SPOTLIGHT ─── */
+.vendor-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--border-light); }
+.vendor-row:last-child { border-bottom: none; }
+.vendor-name { flex: 1; font-size: 12px; font-weight: 600; color: var(--txt-primary); }
+.vendor-factory { font-size: 10px; color: var(--txt-muted); }
+.vendor-status { flex-shrink: 0; }
+
+/* ─── PROGRESS GAUGE ROW ─── */
+.gauge-row { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.gauge-row:last-child { margin-bottom: 0; }
+.gauge-factory { font-size: 11px; font-weight: 800; width: 32px; flex-shrink: 0; }
+.gauge-track { flex: 1; height: 24px; background: var(--border-light); border-radius: 6px; overflow: hidden; position: relative; }
+.gauge-fill { height: 100%; border-radius: 6px; display: flex; align-items: center; padding-left: 10px; font-size: 11px; font-weight: 800; color: #fff; transition: width .6s ease; }
+.gauge-side { font-size: 11px; color: var(--txt-muted); width: 80px; flex-shrink: 0; }
+
+@media (max-width: 1100px) {
+  .kpi-strip { grid-template-columns: repeat(3,1fr); }
+  .ov-row-1 { grid-template-columns: 1fr; }
+  .ov-row-2 { grid-template-columns: 1fr; }
+  .ov-row-3 { grid-template-columns: 1fr; }
+}
+
+/* ═══════════ SECTION TITLE ═══════════ */
+.section-title {
+  font-size: 13px; font-weight: 700; color: var(--txt-primary);
+  display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+}
+.section-title::before {
+  content: ''; display: block; width: 4px; height: 16px;
+  background: var(--shc-primary); border-radius: 3px; flex-shrink: 0;
+}
+
+/* ═══════════ GRID (for non-overview pages) ═══════════ */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+.grid-60-40 { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; margin-bottom: 20px; }
+
+.card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-card); padding: 20px 22px;
+}
+.card-title {
+  font-size: 13px; font-weight: 700; color: var(--txt-primary);
+  margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;
+}
+.card-title small { font-size: 11px; font-weight: 400; color: var(--txt-muted); }
+
+/* ═══════════ FACTORY PILLS ═══════════ */
+.factory-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 700;
+}
+.factory-pill.jj  { background: rgba(84,49,228,.12); color: var(--shc-primary); border: 1px solid rgba(84,49,228,.2); }
+.factory-pill.jj2 { background: rgba(5,205,68,.1); color: #059669; border: 1px solid rgba(5,205,68,.2); }
+
+/* ═══════════ HBAR CHART ═══════════ */
+.hbar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.hbar-label { font-size: 11px; color: var(--txt-muted); width: 80px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hbar-track { flex: 1; height: 8px; background: var(--bg-page); border-radius: 20px; overflow: hidden; }
+.hbar-fill { height: 100%; border-radius: 20px; transition: width .6s cubic-bezier(.4,0,.2,1); }
+.hbar-count { font-size: 11px; font-weight: 600; color: var(--txt-secondary); width: 24px; text-align: right; flex-shrink: 0; }
+.chart-wrap { position: relative; height: 200px; }
+
+/* ═══════════ SUMMARY TABLE (Monitoring style) ═══════════ */
+.summary-table {
+  width: 100%; border-collapse: collapse; font-size: 12px;
+}
+.summary-table thead th {
+  background: var(--mon-header); color: rgba(255,255,255,.85);
+  padding: 10px 14px; font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .06em; white-space: nowrap;
+  text-align: left;
+}
+.summary-table thead th:first-child { border-radius: 8px 0 0 8px; }
+.summary-table thead th:last-child  { border-radius: 0 8px 8px 0; }
+.summary-table tbody td {
+  padding: 10px 14px; border-bottom: 1px solid var(--border-light);
+  color: var(--txt-primary); vertical-align: middle;
+}
+.summary-table tbody tr:last-child td { border-bottom: none; font-weight: 700; }
+.summary-table tbody tr:hover td { background: rgba(240,242,245,.7); }
+.pct-green { color: #059669; font-weight: 700; }
+.pct-red   { color: var(--c-bad); font-weight: 700; }
+.pct-amber { color: #D97706; font-weight: 700; }
+
+/* ═══════════ FULL TABLE ═══════════ */
+.table-box {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-card); overflow: hidden; margin-bottom: 20px;
+}
+.table-toolbar {
+  padding: 16px 20px; border-bottom: 1px solid var(--border-light);
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  background: linear-gradient(to bottom, #fafbff, #fff);
+}
+.table-toolbar h3 { font-size: 14px; font-weight: 700; flex: 1; color: var(--txt-primary); }
+.table-toolbar input, .table-toolbar select {
+  padding: 7px 11px; border: 1px solid var(--border); border-radius: 8px;
+  font-size: 12px; color: var(--txt-primary); background: var(--bg-page); outline: none;
+  font-family: 'Pretendard', system-ui, sans-serif;
+}
+.table-toolbar input { width: 180px; }
+.table-toolbar input:focus, .table-toolbar select:focus {
+  border-color: var(--shc-light); box-shadow: 0 0 0 3px rgba(84,49,228,.1);
+}
+.tbl-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+thead th {
+  padding: 10px 14px; text-align: left; font-size: 10px; font-weight: 700;
+  color: rgba(255,255,255,.8); text-transform: uppercase; letter-spacing: .06em;
+  background: var(--mon-header); white-space: nowrap;
+}
+thead th:first-child { border-radius: 0; }
+tbody td { padding: 10px 14px; border-bottom: 1px solid var(--border-light); color: var(--txt-primary); vertical-align: top; }
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: rgba(240,242,245,.6); }
+.td-trunc { max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.empty-row { text-align: center; padding: 40px; color: var(--txt-muted); font-size: 13px; }
+
+/* ═══════════ FREEZE PANES (Issue Monitoring / Daily Report table) ═══════════
+   Emulates Excel "freeze panes": header row stays pinned while scrolling
+   down, and the first columns (Date / PIC / Factory) stay pinned while
+   scrolling right. */
+.frz-wrap {
+  overflow: auto;
+  max-height: 560px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  position: relative;
+}
+.frz-title {
+  position: sticky; top: 0; left: 0; z-index: 30;
+  background: var(--shc-dark);
+  color: #fff; font-size: 12px; font-weight: 800;
+  letter-spacing: .06em; text-transform: uppercase;
+  padding: 10px 16px;
+}
+.frz-tbl { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 12px; min-width: 1500px; }
+.frz-tbl thead th {
+  position: sticky; top: 33px; z-index: 20;
+  background: var(--shc-primary); color: #fff;
+  font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em;
+  padding: 10px 12px; text-align: left; white-space: nowrap;
+  border-right: 1px solid rgba(255,255,255,.15);
+  border-bottom: 1px solid rgba(255,255,255,.15);
+}
+.frz-tbl tbody td {
+  padding: 9px 12px; border-bottom: 1px solid var(--border-light);
+  border-right: 1px solid var(--border-light);
+  color: var(--txt-primary); vertical-align: top; background: var(--bg-card);
+  white-space: nowrap;
+}
+.frz-tbl tbody tr:nth-child(even) td { background: #FAFBFF; }
+.frz-tbl tbody tr:hover td { background: rgba(84,49,228,.06); }
+.frz-tbl .wrap-cell { white-space: normal; max-width: 220px; }
+/* frozen (pinned) columns — Date, PIC, Factory */
+.frz-tbl .fcol-1, .frz-tbl .fcol-2, .frz-tbl .fcol-3 { position: sticky; z-index: 10; }
+.frz-tbl thead .fcol-1, .frz-tbl thead .fcol-2, .frz-tbl thead .fcol-3 { z-index: 25; }
+.frz-tbl .fcol-1 { left: 0; min-width: 96px; }
+.frz-tbl .fcol-2 { left: 96px; min-width: 110px; }
+.frz-tbl .fcol-3 { left: 206px; min-width: 90px; box-shadow: 4px 0 6px -4px rgba(27,37,89,.25); }
+.frz-tbl tbody .fcol-1, .frz-tbl tbody .fcol-2, .frz-tbl tbody .fcol-3 { background: #fff; }
+.frz-tbl tbody tr:nth-child(even) .fcol-1,
+.frz-tbl tbody tr:nth-child(even) .fcol-2,
+.frz-tbl tbody tr:nth-child(even) .fcol-3 { background: #F6F5FE; }
+.frz-tbl thead .fcol-1 { background: var(--shc-primary); }
+.frz-tbl thead .fcol-2 { background: var(--shc-primary); }
+.frz-tbl thead .fcol-3 { background: var(--shc-primary); }
+
+/* ═══════════ BADGES ═══════════ */
+.badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+.b-progress { background: rgba(84,49,228,.12); color: var(--shc-primary); }
+.b-done     { background: rgba(5,205,68,.12); color: #059669; }
+.b-waiting  { background: rgba(255,203,69,.18); color: #B45309; }
+.b-hold     { background: rgba(163,174,208,.15); color: #64748b; }
+.b-high     { background: rgba(227,26,26,.1); color: var(--c-bad); border: 1px solid rgba(227,26,26,.2); }
+.b-medium   { background: rgba(255,203,69,.18); color: #B45309; border: 1px solid rgba(255,203,69,.3); }
+.b-low      { background: rgba(5,205,68,.1); color: #059669; border: 1px solid rgba(5,205,68,.2); }
+
+/* ═══════════ REPORT CARDS ═══════════ */
+.report-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-card); padding: 18px 20px; margin-bottom: 12px;
+  transition: box-shadow .15s;
+}
+.report-card:hover { box-shadow: 0 2px 12px rgba(27,37,89,.08); }
+.report-card-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 800; flex-shrink: 0;
+}
+.report-pic { font-size: 13px; font-weight: 700; color: var(--txt-primary); }
+.report-date { font-size: 11px; color: var(--txt-muted); }
+.report-body { font-size: 13px; color: #475569; line-height: 1.7; }
+.report-remark {
+  font-size: 12px; color: #64748b; line-height: 1.6;
+  border-left: 3px solid var(--shc-lighter); padding: 8px 12px; margin-top: 10px;
+  background: var(--bg-page); border-radius: 0 6px 6px 0;
+}
+.no-reports { text-align: center; padding: 48px; color: var(--txt-muted); font-size: 13px; }
+.sec-head {
+  font-size: 11px; font-weight: 700; color: var(--txt-muted);
+  text-transform: uppercase; letter-spacing: .08em; margin: 24px 0 10px;
+  display: flex; align-items: center; gap: 8px;
+}
+.sec-head::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* ═══════════ MODAL ═══════════ */
+.overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(3,0,80,.45); backdrop-filter: blur(4px);
+  z-index: 400; align-items: center; justify-content: center; padding: 16px;
+}
+.overlay.open { display: flex; }
+.modal {
+  background: var(--bg-card); border-radius: 20px; width: 100%; max-width: 540px;
+  max-height: 90vh; overflow-y: auto;
+  box-shadow: 0 30px 80px rgba(3,0,80,.4);
+  border: 1px solid var(--border);
+}
+.modal-head {
+  padding: 20px 24px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; background: var(--bg-card); z-index: 1;
+  border-radius: 20px 20px 0 0;
+}
+.modal-head-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; margin-right: 12px; flex-shrink: 0;
+}
+.modal-head h2 { font-size: 15px; font-weight: 800; color: var(--txt-primary); flex: 1; }
+.modal-close { background: var(--bg-page); border: 1px solid var(--border); font-size: 18px; cursor: pointer; color: var(--txt-muted); line-height: 1; padding: 4px 8px; border-radius: 8px; }
+.modal-close:hover { background: var(--border); color: var(--txt-primary); }
+.modal-body { padding: 22px 24px; }
+.modal-foot { padding: 16px 24px; border-top: 1px solid var(--border-light); display: flex; justify-content: flex-end; gap: 10px; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.fg { display: flex; flex-direction: column; gap: 5px; }
+.fg.full { grid-column: 1 / -1; }
+.fg label { font-size: 11px; font-weight: 700; color: var(--txt-muted); text-transform: uppercase; letter-spacing: .05em; }
+.fg input, .fg select, .fg textarea {
+  padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px;
+  font-size: 13px; color: var(--txt-primary); background: #fff;
+  font-family: 'Pretendard', system-ui, sans-serif; outline: none; transition: all .15s;
+}
+.fg input:focus, .fg select:focus, .fg textarea:focus {
+  border-color: var(--shc-light); box-shadow: 0 0 0 3px rgba(84,49,228,.1);
+}
+.fg textarea { resize: vertical; min-height: 80px; }
+.req { color: var(--c-bad); margin-left: 2px; }
+.btn-cancel { background: var(--bg-page); color: var(--txt-muted); border: 1px solid var(--border); padding: 9px 18px; border-radius: 9px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Pretendard', system-ui, sans-serif; }
+.btn-cancel:hover { background: var(--border); }
+.btn-save { color: #fff; border: none; padding: 9px 22px; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: 'Pretendard', system-ui, sans-serif; }
+.btn-save.blue  { background: var(--shc-primary); } .btn-save.blue:hover  { background: #4828d0; }
+.btn-save.red   { background: var(--c-bad); }       .btn-save.red:hover   { background: #b92d3e; }
+.btn-save.green { background: #059669; }             .btn-save.green:hover { background: #047857; }
+
+/* ═══════════ UPDATE BTN ═══════════ */
+.btn-upd {
+  font-size: 11px; padding: 4px 10px; border-radius: 7px;
+  background: var(--bg-page); border: 1px solid var(--border); cursor: pointer; color: var(--txt-muted);
+  font-family: 'Pretendard', system-ui, sans-serif; transition: all .15s;
+}
+.btn-upd:hover { background: rgba(84,49,228,.1); color: var(--shc-primary); border-color: rgba(84,49,228,.2); }
+.btn-edit { color: var(--shc-primary); border-color: rgba(84,49,228,.25); background: rgba(84,49,228,.06); }
+.btn-edit:hover { background: rgba(84,49,228,.15); }
+.btn-del { color: var(--c-bad); border-color: rgba(227,26,26,.25); background: rgba(227,26,26,.05); }
+.btn-del:hover { background: rgba(227,26,26,.12); }
+.row-actions { display: flex; gap: 6px; flex-wrap: nowrap; }
+
+/* ═══════════ FAB ═══════════ */
+.fab-group {
+  display: none; position: fixed; bottom: 28px; right: 28px;
+  flex-direction: column; gap: 10px; z-index: 300; align-items: flex-end;
+}
+.fab-group.visible { display: flex; }
+.fab {
+  display: flex; align-items: center; gap: 8px; padding: 12px 20px;
+  border-radius: 40px; font-size: 13px; font-weight: 700; border: none; cursor: pointer;
+  box-shadow: 0 4px 20px rgba(0,0,0,.2); transition: all .15s;
+  font-family: 'Pretendard', system-ui, sans-serif;
+}
+.fab:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(0,0,0,.28); }
+.fab-act   { background: var(--shc-primary); color: #fff; }
+.fab-issue { background: var(--c-bad); color: #fff; }
+
+/* ═══════════ TOAST ═══════════ */
+.toast {
+  position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(60px);
+  background: var(--mon-header); color: #fff; padding: 12px 24px; border-radius: 12px;
+  font-size: 13px; font-weight: 600; z-index: 999; opacity: 0; transition: all .3s;
+  white-space: nowrap; border: 1px solid rgba(192,255,69,.2);
+  box-shadow: 0 8px 32px rgba(3,0,80,.35);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ═══════════ STAT CARD (monitoring reference) ═══════════ */
+.stat-row { display: flex; gap: 6px; align-items: center; margin-bottom: 4px; }
+.stat-label-sm { font-size: 10px; color: var(--txt-muted); }
+.stat-val-lg { font-size: 32px; font-weight: 800; letter-spacing: -.03em; }
+.stat-change {
+  font-size: 11px; font-weight: 700; padding: 2px 7px;
+  border-radius: 7px; display: inline-flex; align-items: center; gap: 3px;
+}
+.stat-change.pos { background: rgba(5,205,68,.12); color: #059669; }
+.stat-change.neg { background: rgba(227,26,26,.1); color: var(--c-bad); }
+
+/* ══════════════════════════════════════
+   MONITORING REFERENCE LAYOUT STYLES
+══════════════════════════════════════ */
+
+/* Section label — matches reference "KPI 회계연도" style */
+.mon-section-label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 700; color: var(--txt-primary);
+  margin-bottom: 12px; letter-spacing: -.01em;
+}
+.mon-section-bar {
+  display: block; width: 4px; height: 18px;
+  background: var(--shc-primary); border-radius: 3px; flex-shrink: 0;
+}
+
+/* KPI Grid — 5 cards in a row like the reference */
+.mon-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 4px rgba(27,37,89,.05);
+}
+.mon-kpi-card {
+  padding: 20px 22px;
+  border-right: 1px solid var(--border-light);
+  position: relative;
+}
+.mon-kpi-card:last-child { border-right: none; }
+.mon-kpi-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  background: var(--shc-primary);
+}
+.mon-kpi-label {
+  font-size: 10px; font-weight: 700; color: var(--txt-muted);
+  text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px;
+}
+.mon-kpi-val {
+  font-size: 30px; font-weight: 900; line-height: 1.05; letter-spacing: -.03em;
+  margin-bottom: 4px;
+}
+.mon-kpi-val.blue  { color: var(--shc-primary); }
+.mon-kpi-val.red   { color: var(--c-bad); }
+.mon-kpi-val.amber { color: #D97706; }
+.mon-kpi-val.green { color: #059669; }
+.mon-kpi-val.navy  { color: var(--mon-blue); }
+.mon-kpi-sub {
+  font-size: 11px; color: var(--txt-muted); line-height: 1.4;
+}
+.mon-kpi-badge-row {
+  display: flex; gap: 4px; margin-top: 6px; flex-wrap: wrap;
+}
+.mon-kpi-bar-wrap {
+  height: 4px; background: var(--border-light); border-radius: 4px;
+  overflow: hidden; margin-top: 10px;
+}
+.mon-kpi-bar-fill { height: 100%; border-radius: 4px; transition: width .6s ease; }
+
+/* 2-column row */
+.mon-row-2col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* 3-column row */
+.mon-row-3col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+/* Mon card — white card with subtle shadow */
+.mon-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 20px 22px;
+  box-shadow: 0 1px 4px rgba(27,37,89,.04);
+}
+.mon-card-head {
+  font-size: 13px; font-weight: 700; color: var(--txt-primary);
+  display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+}
+.mon-card-head-sub {
+  font-size: 11px; font-weight: 400; color: var(--txt-muted);
+}
+.mon-divider { height: 1px; background: var(--border-light); margin: 14px 0; }
+
+/* Issue grid inside mon card */
+.mon-issue-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px;
+}
+
+/* Mon table — compact table matching reference */
+.mon-tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+.mon-tbl thead th {
+  background: var(--mon-header); color: rgba(255,255,255,.85);
+  padding: 8px 12px; font-size: 10px; font-weight: 600;
+  text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; text-align: left;
+}
+.mon-tbl thead th:first-child { border-radius: 8px 0 0 8px; }
+.mon-tbl thead th:last-child  { border-radius: 0 8px 8px 0; }
+.mon-tbl tbody td {
+  padding: 8px 12px; border-bottom: 1px solid var(--border-light);
+  color: var(--txt-primary); vertical-align: middle;
+}
+.mon-tbl tbody tr:last-child td { border-bottom: none; }
+.mon-tbl tbody tr:hover td { background: rgba(240,242,245,.7); }
+
+/* Monitoring alerts section */
+.mon-alerts-grid {
+  display: flex; flex-direction: column; gap: 8px;
+}
+.mon-alert-item {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 12px 16px; border-radius: 10px;
+  font-size: 13px; font-weight: 500; line-height: 1.5;
+}
+.mon-alert-item.red  { background: rgba(227,26,26,.06); border: 1px solid rgba(227,26,26,.15); }
+.mon-alert-item.amber{ background: rgba(255,203,69,.1);  border: 1px solid rgba(255,203,69,.25); }
+.mon-alert-item.green{ background: rgba(5,205,68,.06);   border: 1px solid rgba(5,205,68,.2); }
+.mon-alert-item.blue { background: rgba(84,49,228,.06);  border: 1px solid rgba(84,49,228,.15); }
+.mon-alert-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 4px;
+}
+.mon-alert-dot.red   { background: var(--c-bad); }
+.mon-alert-dot.amber { background: #FFCB45; }
+.mon-alert-dot.green { background: #05CD44; }
+.mon-alert-dot.blue  { background: var(--shc-primary); }
+
+/* ═══════════ RESPONSIVE ═══════════ */
+@media (max-width: 1100px) {
+  .kpi-row { grid-template-columns: repeat(3,1fr); }
+  .grid-60-40 { grid-template-columns: 1fr; }
+  .mon-kpi-grid { grid-template-columns: repeat(3,1fr); }
+  .mon-row-2col { grid-template-columns: 1fr; }
+  .mon-row-3col { grid-template-columns: 1fr; }
+}
+@media (max-width: 860px) {
+  .sidebar { width: 64px; }
+  .sidebar-app-label, .sidebar-section-label, .nav-item span, .user-info-sm { display: none; }
+  .nav-item { justify-content: center; padding: 12px; }
+  .nav-icon { width: 22px; height: 22px; }
+  .sidebar-user { justify-content: center; }
+  .main-wrap { margin-left: 64px; }
+  .kpi-row { grid-template-columns: repeat(2,1fr); }
+  .grid-2, .grid-3 { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .kpi-row { grid-template-columns: 1fr 1fr; }
+  .form-row { grid-template-columns: 1fr; }
+  .content { padding: 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- SVG Symbols -->
+<svg style="display:none" xmlns="http://www.w3.org/2000/svg">
+  <symbol id="shc-sym" viewBox="0 0 215.3 215.3">
+    <rect x="0" y="0" width="107.65" height="215.3" fill="#372493"/>
+    <path d="M107.85 215.3 0 215.3C0 96.58 96.59 0 215.3 0L215.3 107.84C155.96 107.84 107.85 155.95 107.85 215.29Z" fill="#432BB6"/>
+    <path d="M107.65 28.9 107.65 215.3 0 215.3C0 174.23 11.56 135.81 31.6 103.13 50.36 72.51 76.55 46.92 107.65 28.91Z" fill="#2C1E74"/>
+  </symbol>
+  <symbol id="shc-word" viewBox="0 0 49.06 15.72">
+    <path d="M40.63 11.8C38.46 11.8 36.93 10.03 37.24 7.86 37.54 5.69 39.57 3.92 41.74 3.92 43.17 3.92 44.31 4.68 44.83 5.82L49.06 5.82C48.63 2.48 45.92 0 42.29 0 37.96 0 33.93 3.53 33.33 7.86 32.72 12.2 35.76 15.72 40.09 15.72 43.72 15.72 47.13 13.25 48.49 9.9L44.27 9.9C43.43 11.04 42.07 11.8 40.64 11.8Z" fill="currentColor"/>
+    <path d="M28.27 4.95 27.5 4.95C25.06 4.95 22.69 5.77 20.7 7.15 20.68 7.17 20.65 7.18 20.63 7.2L21.62 0.09 17.5 0.09 15.32 15.61 15.32 15.63 15.32 15.63 15.32 15.63 19.44 15.63 19.44 15.63C19.48 15.31 19.55 15 19.63 14.7 20.53 11.52 23.61 9.07 26.91 9.07L27.68 9.07 26.76 15.63 30.88 15.63 33.08 0.09 28.96 0.09Z" fill="currentColor"/>
+    <path d="M16.12 0.09 14.13 0.09C10.25 0.09 6.65 3.25 6.1 7.14L5.88 8.72C5.66 10.31 4.19 11.6 2.6 11.6L0.58 11.6 0 15.73 1.99 15.73C5.88 15.73 9.48 12.58 10.02 8.68L10.24 7.1C10.46 5.51 11.93 4.22 13.52 4.22L15.54 4.22Z" fill="currentColor"/>
+  </symbol>
+  <!-- Icons -->
+  <symbol id="ic-home" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="9 22 9 12 15 12 15 22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-list" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="12" x2="21" y2="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="18" x2="21" y2="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="3" cy="6" r="1" fill="currentColor"/><circle cx="3" cy="12" r="1" fill="currentColor"/><circle cx="3" cy="18" r="1" fill="currentColor"/></symbol>
+  <symbol id="ic-alert" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="9" x2="12" y2="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="17" x2="12.01" y2="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="ic-file" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="14 2 14 8 20 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="ic-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polyline points="16 17 21 12 16 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><line x1="21" y1="12" x2="9" y2="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+</svg>
+
+<!-- ═══════════════════════════════════════
+     LOGIN SCREEN — WHITE THEME
+═══════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="grid-bg"></div>
+  <div class="login-box">
+    <div class="login-logo-wrap">
+      <div class="login-logo-mark">
+        <div style="display:flex;flex-direction:column;gap:3px;align-items:center">
+          <svg style="height:32px;color:var(--shc-primary)"><use href="#shc-word"/></svg>
+          <div style="font-size:11px;font-weight:700;color:var(--txt-muted);letter-spacing:.12em;text-transform:uppercase">Indonesia</div>
+        </div>
+      </div>
+    </div>
+    <span class="login-badge" id="login-badge">SHI DELEGATE</span>
+    <div class="login-title" id="login-title">Dashboard JJ &amp; JJ2</div>
+    <div class="login-sub" id="login-sub">Daily Monitoring · Field Operations</div>
+    <hr class="login-divider">
+    <div class="login-err" id="login-err">Password salah. Coba lagi.</div>
+    <input type="password" id="pw-input" data-i18n-ph="login_pw_ph" placeholder="Password PIC..." onkeydown="if(event.key==='Enter')tryLogin()">
+    <button class="login-btn-main" id="login-btn" onclick="tryLogin()">Masuk sebagai PIC →</button>
+    <a class="login-view-link" id="login-viewer-link" onclick="enterViewer()">Lihat dashboard saja (tanpa login)</a>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     APP
+═══════════════════════════════════════ -->
+<div id="app">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAnoAAAE5CAMAAAAwUH1hAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAMAUExURQAAAP///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////wc9CwgAAAEAdFJOUwAHEA8EBgEOBSQ7T2aBn67M1uX//NzArJV5WUUxGg0XIUFgc46Ytbu8ydDPwxNGyC40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" style="height:52px;width:auto;display:block" alt="SHC Indonesia Delegate">
+    </div>
+
+    <nav class="sidebar-nav">
+      <div class="sidebar-section-label" data-i18n="nav_main">MAIN</div>
+      <button class="nav-item active" onclick="showPage('overview',this)" data-i18n="nav_overview">
+        <svg class="nav-icon"><use href="#ic-home"/></svg>
+        <span data-i18n="nav_overview">Overview</span>
+      </button>
+      <button class="nav-item" onclick="showPage('aktivitas',this)">
+        <svg class="nav-icon"><use href="#ic-list"/></svg>
+        <span data-i18n="nav_activities">Aktivitas Harian</span>
+      </button>
+      <button class="nav-item" onclick="showPage('issues',this)">
+        <svg class="nav-icon"><use href="#ic-alert"/></svg>
+        <span data-i18n="nav_issues">Issue Tracker</span>
+      </button>
+
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="user-avatar-sm" id="sidebar-avatar">V</div>
+        <div class="user-info-sm">
+          <div class="user-name-sm" id="sidebar-name">Viewer</div>
+          <div class="user-role-sm" id="sidebar-role" data-i18n="role_viewer">View Only</div>
+        </div>
+        <button class="btn-logout-sm" onclick="doLogout()" title="Logout">
+          <svg style="width:16px;height:16px"><use href="#ic-logout"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-wrap">
+    <!-- Topbar -->
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div>
+          <div class="topbar-title" id="topbar-title">SHI Delegate Dashboard</div>
+          <div class="topbar-sub" id="topbar-date"></div>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <!-- Sync status -->
+        <div style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;background:var(--bg-page);border:1px solid var(--border);font-size:11px;font-weight:600;color:var(--txt-muted)">
+          <span id="fb-status-dot" style="width:7px;height:7px;border-radius:50%;background:#A3AED0;flex-shrink:0"></span>
+          <span id="fb-status-label">Menyambungkan…</span>
+        </div>
+        <!-- Language switcher -->
+        <div class="lang-switcher-bar">
+          <button class="lang-pill active" onclick="setLang('id',this,'bar')">ID</button>
+          <button class="lang-pill" onclick="setLang('en',this,'bar')">EN</button>
+          <button class="lang-pill" onclick="setLang('ko',this,'bar')">KO</button>
+        </div>
+        <div class="pic-badge" id="pic-chip" style="display:none">
+          <div class="pic-dot-green"></div>
+          <span id="pic-name-chip" data-i18n="pic_mode">PIC Mode</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pages -->
+    <div class="content">
+
+      <!-- ── OVERVIEW ── -->
+      <div id="page-overview" class="page active">
+
+        <!-- ════ SECTION A: KPI CARDS (Monitoring Style) ════ -->
+        <div class="mon-section-label">
+          <span class="mon-section-bar"></span>
+          <span id="page-overview-kpi-label">KPI Kumulatif — Ringkasan Lapangan (JJ &amp; JJ2)</span>
+        </div>
+
+        <div class="mon-kpi-grid">
+          <!-- Card 1: Total Aktivitas -->
+          <div class="mon-kpi-card">
+            <div class="mon-kpi-label" data-i18n="kpi_activities">Total Aktivitas</div>
+            <div class="mon-kpi-val blue" id="kpi-act">—</div>
+            <div class="mon-kpi-sub" id="kpi-act-meta">JJ + JJ2</div>
+          </div>
+          <!-- Card 2: Issue Open -->
+          <div class="mon-kpi-card">
+            <div class="mon-kpi-label" data-i18n="kpi_open_issues">Issue Open</div>
+            <div class="mon-kpi-val red" id="kpi-open">—</div>
+            <div class="mon-kpi-sub" id="kpi-open-meta">dari total issue</div>
+            <div class="mon-kpi-badge-row" id="kpi-open-badge"></div>
+          </div>
+          <!-- Card 3: Completion Rate -->
+          <div class="mon-kpi-card">
+            <div class="mon-kpi-label">Completion Rate</div>
+            <div class="mon-kpi-val amber" id="kpi-rate">—</div>
+            <div class="mon-kpi-sub" id="kpi-rate-meta">aktivitas selesai</div>
+            <div class="mon-kpi-bar-wrap"><div class="mon-kpi-bar-fill" id="kpi-rate-bar" style="background:#FFCB45;width:0%"></div></div>
+          </div>
+          <!-- Card 4: Hari Aktif -->
+          <div class="mon-kpi-card">
+            <div class="mon-kpi-label">Hari Aktif</div>
+            <div class="mon-kpi-val green" id="kpi-rep">—</div>
+            <div class="mon-kpi-sub" id="kpi-rep-meta">JJ + JJ2</div>
+          </div>
+          <!-- Card 5: Hari Laporan -->
+          <div class="mon-kpi-card">
+            <div class="mon-kpi-label" data-i18n="kpi_days">Hari Laporan</div>
+            <div class="mon-kpi-val navy" id="kpi-days">—</div>
+            <div class="mon-kpi-sub" id="kpi-days-meta" style="display:none">tanggal unik</div>
+          </div>
+        </div>
+
+        <!-- ════ SECTION B: FACTORY PERFORMANCE ════ -->
+        <div class="mon-section-label" style="margin-top:24px">
+          <span class="mon-section-bar"></span>
+          <span>Performa Factory — Completed vs Total Aktivitas</span>
+        </div>
+
+        <div class="mon-row-2col" style="margin-bottom:20px">
+          <!-- Left: Factory gauges + date activity bars -->
+          <div class="mon-card">
+            <div class="mon-card-head">Performa Factory <span class="mon-card-head-sub">Completed / Total</span></div>
+            <div id="factory-gauges" style="margin-top:4px"></div>
+            <div class="mon-divider"></div>
+            <div class="mon-card-head" style="margin-top:4px">Aktivitas per Tanggal <span class="mon-card-head-sub">10 terakhir</span></div>
+            <div id="date-bars-new" style="margin-top:8px"></div>
+          </div>
+
+          <!-- Right: Issue breakdown + resolution -->
+          <div class="mon-card">
+            <div class="mon-card-head">Issue Breakdown</div>
+            <div class="mon-issue-grid" id="issue-scorecard"></div>
+            <div class="mon-divider"></div>
+            <div class="mon-card-head">Tingkat Resolusi</div>
+            <div style="text-align:center;padding:10px 0 6px">
+              <div style="font-size:40px;font-weight:900;letter-spacing:-.03em;line-height:1" id="ov-res-pct">—%</div>
+              <div style="font-size:11px;color:var(--txt-muted);margin-top:2px">issue berhasil diselesaikan</div>
+            </div>
+            <div class="resolution-track" style="margin:10px 0 8px">
+              <div class="resolution-fill" id="ov-res-fill" style="background:#05CD44;width:0%"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+              <span style="font-size:11px;color:#059669;font-weight:700" id="ov-res-done">—</span>
+              <span style="font-size:11px;color:var(--txt-muted)" id="ov-res-open">—</span>
+            </div>
+            <div id="ov-priority-mini"></div>
+          </div>
+        </div>
+
+        <!-- ════ SECTION C: DEPT MATRIX + OPEN ISSUES ════ -->
+        <div class="mon-row-2col" style="margin-bottom:20px">
+          <!-- Dept activity matrix -->
+          <div class="mon-card">
+            <div class="mon-card-head">Aktivitas per Departemen <span class="mon-card-head-sub">JJ vs JJ2</span></div>
+            <div class="dept-matrix" id="dept-matrix" style="margin-top:8px"></div>
+          </div>
+
+          <!-- Open issues detail -->
+          <div class="mon-card">
+            <div class="mon-card-head">Open Issues — Detail <span class="mon-card-head-sub" id="ov-iss-count-label">semua</span></div>
+            <table class="mon-tbl" style="margin-top:8px">
+              <thead><tr>
+                <th>Item · Vendor</th>
+                <th>Prioritas</th>
+                <th>Progress</th>
+              </tr></thead>
+              <tbody id="ov-issue-heat-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ════ SECTION D: ACTIVITY FEED + TOP DEPT + SUMMARY ════ -->
+        <div class="mon-row-3col" style="margin-bottom:20px">
+          <!-- Feed aktivitas terkini -->
+          <div class="mon-card" style="grid-column:span 2">
+            <div class="mon-card-head">Feed Aktivitas Terkini <span class="mon-card-head-sub">5 hari terakhir</span></div>
+            <div class="feed-list" id="ov-feed" style="margin-top:8px"></div>
+          </div>
+
+          <!-- Top Dept leaderboard -->
+          <div class="mon-card">
+            <div class="mon-card-head">Top Departemen</div>
+            <div id="ov-dept-rank" style="margin-top:8px"></div>
+          </div>
+        </div>
+
+        <!-- ════ SECTION E: SUMMARY TABLE ════ -->
+        <div class="mon-card" style="margin-bottom:20px">
+          <div class="mon-card-head">Ringkasan Aktivitas per Factory</div>
+          <div style="overflow-x:auto;margin-top:12px">
+            <table class="summary-table">
+              <thead>
+                <tr>
+                  <th data-i18n="tbl_factory">Factory</th>
+                  <th data-i18n="tbl_total_act">Total Aktivitas</th>
+                  <th data-i18n="tbl_completed">Completed</th>
+                  <th data-i18n="tbl_in_progress">In Progress</th>
+                  <th data-i18n="tbl_completion_rate">Completion Rate</th>
+                </tr>
+              </thead>
+              <tbody id="summary-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ════ SECTION F: MONITORING ALERTS ════ -->
+        <div class="mon-section-label">
+          <span class="mon-section-bar"></span>
+          <span>Inti Monitoring — Perhatian</span>
+        </div>
+        <div class="mon-alerts-grid" id="mon-alerts" style="margin-bottom:24px"></div>
+
+        <!-- hidden canvases for compatibility -->
+        <canvas id="chart-prior" style="display:none"></canvas>
+        <canvas id="chart-status" style="display:none"></canvas>
+        <canvas id="chart-resolution-ring" style="display:none" width="80" height="80"></canvas>
+        <!-- legacy element stubs -->
+        <div id="issue-health-bars" style="display:none"></div>
+        <div id="issue-stacked-bar" style="display:none"></div>
+        <div id="issue-stacked-legend" style="display:none"></div>
+        <div id="factory-perf-grid" style="display:none"></div>
+        <div id="quick-insights" style="display:none"></div>
+        <div id="dept-bars" style="display:none"></div>
+        <div id="recent-issues-list" style="display:none"></div>
+        <div id="priority-breakdown" style="display:none"></div>
+        <div id="resolution-pct" style="display:none"></div>
+        <div id="resolution-desc" style="display:none"></div>
+        <div id="date-bars" style="display:none"></div>
+        <div id="recent-activity-list" style="display:none"></div>
+
+        <!-- legacy kpi stubs (signal row IDs) -->
+        <div id="sig-high" style="display:none"></div>
+        <div id="sig-wait" style="display:none"></div>
+        <div id="sig-res" style="display:none"></div>
+        <div id="sig-total" style="display:none"></div>
+        <div id="sig-avg" style="display:none"></div>
+        <div id="sig-last" style="display:none"></div>
+        <div id="sig-top-factory" style="display:none"></div>
+      </div>
+
+      <!-- ── AKTIVITAS ── -->
+      <div id="page-aktivitas" class="page">
+        <div class="page-header">
+          <div>
+            <div class="page-header-title" data-i18n="nav_activities">Aktivitas Harian</div>
+            <div class="page-header-sub" id="page-act-sub" data-i18n="act_sub">Semua aktivitas lapangan JJ &amp; JJ2</div>
+          </div>
+        </div>
+        <div class="table-box">
+          <div class="table-toolbar">
+            <h3 data-i18n="nav_activities">Aktivitas Harian</h3>
+            <input id="act-q" type="text" placeholder="Cari..." data-i18n-ph="search_ph" oninput="renderActTable()">
+            <select id="act-factory" onchange="renderActTable()">
+              <option value="" data-i18n="all_factory">Semua Factory</option>
+              <option>JJ</option><option>JJ2</option>
+            </select>
+            <select id="act-dept-f" onchange="renderActTable()">
+              <option value="" data-i18n="all_dept">Semua Dept</option>
+            </select>
+          </div>
+          <div class="tbl-wrap">
+            <table>
+              <thead><tr>
+                <th data-i18n="col_date">Tanggal</th>
+                <th data-i18n="col_factory">Factory</th>
+                <th data-i18n="col_pic">PIC</th>
+                <th data-i18n="col_dept">Departemen</th>
+                <th data-i18n="col_desc">Deskripsi</th>
+                <th data-i18n="field_remark">Remark</th>
+                <th data-i18n="col_status">Status</th>
+                <th id="th-act-upd"></th>
+              </tr></thead>
+              <tbody id="act-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ISSUES ── -->
+      <div id="page-issues" class="page">
+        <div class="page-header">
+          <div>
+            <div class="page-header-title" data-i18n="nav_issues">Issue Tracker</div>
+            <div class="page-header-sub" id="page-iss-sub" data-i18n="iss_sub">Monitoring issue aktif &amp; history penyelesaian</div>
+          </div>
+        </div>
+        <div class="table-box">
+          <div class="table-toolbar">
+            <h3 data-i18n="nav_issues">Issue Tracker</h3>
+            <input id="iss-q" type="text" placeholder="Cari..." data-i18n-ph="search_ph" oninput="renderIssTable()">
+            <select id="iss-factory" onchange="renderIssTable()">
+              <option value="" data-i18n="all_factory">Semua Factory</option>
+              <option>JJ</option><option>JJ2</option>
+            </select>
+            <select id="iss-prior-f" onchange="renderIssTable()">
+              <option value="" data-i18n="all_priority">Semua Prioritas</option>
+              <option>High</option><option>Medium</option><option>Low</option>
+            </select>
+          </div>
+          <div class="frz-wrap" id="iss-frz-wrap">
+            <div class="frz-title" data-i18n="daily_report_title">DAILY REPORT — ISSUE MONITORING</div>
+            <table class="frz-tbl">
+              <thead><tr>
+                <th class="fcol-1" data-i18n="col_date">Date</th>
+                <th class="fcol-2">PIC</th>
+                <th class="fcol-3" data-i18n="col_factory">Factory</th>
+                <th data-i18n="col_dept">Department</th>
+                <th data-i18n="col_shi_pic">SHI Dept PIC</th>
+                <th data-i18n="col_user">User</th>
+                <th data-i18n="col_item">Item Order</th>
+                <th data-i18n="col_vendor">Vendor</th>
+                <th data-i18n="col_begin_issue">Beginning Issue</th>
+                <th data-i18n="col_issue">Issue Description</th>
+                <th data-i18n="col_priority">Priority</th>
+                <th data-i18n="col_progress">Issue Progress</th>
+                <th data-i18n="col_target">Target Finish Date</th>
+                <th data-i18n="col_finish">Finish Date</th>
+                <th data-i18n="field_remark">Remark</th>
+                <th id="th-upd"></th>
+              </tr></thead>
+              <tbody id="iss-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+
+
+    </div><!-- /content -->
+  </div><!-- /main-wrap -->
+</div><!-- /app -->
+
+<!-- FAB -->
+<div class="fab-group" id="fab-group">
+  <button class="fab fab-issue" id="fab-issue-btn" onclick="openNewIssue()">＋ <span data-i18n="fab_issue">Issue Baru</span></button>
+  <button class="fab fab-act" id="fab-act-btn" onclick="openNewActivity()">＋ <span data-i18n="fab_activity">Aktivitas</span></button>
+</div>
+
+<!-- MODAL: Aktivitas -->
+<div class="overlay" id="modal-activity" onclick="if(event.target===this)closeModal('modal-activity')">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-head-icon" style="background:rgba(84,49,228,.12)">📋</div>
+      <h2 id="modal-activity-title" data-i18n="modal_add_activity">Tambah Aktivitas Harian</h2>
+      <button class="modal-close" onclick="closeModal('modal-activity')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="fg"><label data-i18n="field_date">Tanggal<span class="req">*</span></label><input type="date" id="fa-tanggal"></div>
+        <div class="fg"><label data-i18n="field_factory">Factory<span class="req">*</span></label>
+          <select id="fa-factory"><option value="">— Pilih —</option><option>JJ</option><option>JJ2</option></select></div>
+        <div class="fg"><label data-i18n="field_pic_name">Nama PIC<span class="req">*</span></label><input type="text" id="fa-pic" data-i18n-ph="ph_full_name" placeholder="Nama lengkap"></div>
+        <div class="fg"><label data-i18n="field_dept">Departemen<span class="req">*</span></label><input type="text" id="fa-dept" data-i18n-ph="ph_dept" placeholder="MRO, PS, MEP..."></div>
+        <div class="fg full"><label data-i18n="field_desc">Deskripsi Aktivitas<span class="req">*</span></label><textarea id="fa-desc" data-i18n-ph="ph_activity_desc" placeholder="Jelaskan aktivitas..."></textarea></div>
+        <div class="fg full"><label data-i18n="field_remark">Hasil / Remark</label><textarea id="fa-remark" data-i18n-ph="ph_remark" placeholder="Hasil, catatan, tindak lanjut..." style="min-height:64px"></textarea></div>
+        <div class="fg"><label data-i18n="field_status">Status</label>
+          <select id="fa-status"><option>In Progress</option><option>Completed</option><option>On Hold</option></select></div>
+        <div class="fg"><label data-i18n="field_note">Keterangan</label><input type="text" id="fa-ket" data-i18n-ph="ph_optional_note" placeholder="Catatan (opsional)"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" id="modal-activity-delbtn" style="display:none;color:var(--c-bad);border-color:rgba(227,26,26,.3)" onclick="deleteActivity()" data-i18n="btn_delete">Hapus</button>
+      <button class="btn-cancel" onclick="closeModal('modal-activity')" data-i18n="btn_cancel">Batal</button>
+      <button class="btn-save blue" id="modal-activity-savebtn" onclick="saveActivity()" data-i18n="btn_save_activity">Simpan Aktivitas</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Issue -->
+<div class="overlay" id="modal-issue" onclick="if(event.target===this)closeModal('modal-issue')">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-head-icon" style="background:rgba(227,26,26,.1)">⚠️</div>
+      <h2 id="modal-issue-title" data-i18n="modal_add_issue">Tambah Issue Baru</h2>
+      <button class="modal-close" onclick="closeModal('modal-issue')">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="fg"><label data-i18n="field_date">Tanggal<span class="req">*</span></label><input type="date" id="fi-tanggal"></div>
+        <div class="fg"><label data-i18n="field_factory">Factory<span class="req">*</span></label>
+          <select id="fi-factory"><option value="">— Pilih —</option><option>JJ</option><option>JJ2</option></select></div>
+        <div class="fg"><label data-i18n="field_pic_name">Nama PIC<span class="req">*</span></label><input type="text" id="fi-pic" data-i18n-ph="ph_pic_name" placeholder="Nama PIC"></div>
+        <div class="fg"><label data-i18n="field_dept">Departemen</label><input type="text" id="fi-dept" data-i18n-ph="ph_dept_issue" placeholder="RSM, MATERIAL..."></div>
+        <div class="fg"><label data-i18n="col_shi_pic">SHI Dept PIC</label><input type="text" id="fi-shipic" placeholder="PS - RA, RSM - Ade..."></div>
+        <div class="fg"><label data-i18n="col_user">User</label><input type="text" id="fi-user" placeholder="Warehouse Chemical, Plant Prod..."></div>
+        <div class="fg"><label data-i18n="col_item">Item<span class="req">*</span></label><input type="text" id="fi-item" data-i18n-ph="ph_item" placeholder="Nama item/barang"></div>
+        <div class="fg"><label data-i18n="col_vendor">Vendor<span class="req">*</span></label><input type="text" id="fi-vendor" data-i18n-ph="ph_vendor" placeholder="Nama vendor"></div>
+        <div class="fg full"><label data-i18n="col_begin_issue">Beginning Issue</label><input type="text" id="fi-begin" placeholder="Ringkasan singkat awal issue"></div>
+        <div class="fg full"><label data-i18n="field_issue_desc">Deskripsi Issue<span class="req">*</span></label><textarea id="fi-issue" data-i18n-ph="ph_issue_desc" placeholder="Jelaskan issue..." style="min-height:64px"></textarea></div>
+        <div class="fg"><label data-i18n="col_priority">Prioritas<span class="req">*</span></label>
+          <select id="fi-prior"><option>Low</option><option selected>Medium</option><option>High</option></select></div>
+        <div class="fg"><label data-i18n="field_init_progress">Progress Awal</label><input type="text" id="fi-progress" data-i18n-ph="ph_init_progress" placeholder="Status saat ini"></div>
+        <div class="fg"><label data-i18n="field_target">Target Selesai</label><input type="text" id="fi-target" data-i18n-ph="ph_target" placeholder="End of Month..."></div>
+        <div class="fg"><label data-i18n="field_note">Keterangan</label><input type="text" id="fi-ket" data-i18n-ph="ph_optional_note" placeholder="Catatan (opsional)"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" id="modal-issue-delbtn" style="display:none;color:var(--c-bad);border-color:rgba(227,26,26,.3)" onclick="deleteIssue()" data-i18n="btn_delete">Hapus</button>
+      <button class="btn-cancel" onclick="closeModal('modal-issue')" data-i18n="btn_cancel">Batal</button>
+      <button class="btn-save red" id="modal-issue-savebtn" onclick="saveIssue()" data-i18n="btn_save_issue">Simpan Issue</button>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- MODAL: Update Issue -->
+<div class="overlay" id="modal-update" onclick="if(event.target===this)closeModal('modal-update')">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-head-icon" style="background:rgba(84,49,228,.1)">🔄</div>
+      <h2 data-i18n="modal_update_issue">Update Progress Issue</h2>
+      <button class="modal-close" onclick="closeModal('modal-update')">×</button>
+    </div>
+    <div class="modal-body">
+      <div id="upd-info" style="background:var(--bg-page);border-radius:10px;padding:14px;margin-bottom:16px;font-size:12px;color:var(--txt-secondary);border:1px solid var(--border)"></div>
+      <div class="form-row">
+        <div class="fg full"><label data-i18n="field_current_progress">Progress Terkini<span class="req">*</span></label><input type="text" id="fu-progress" data-i18n-ph="ph_current_progress" placeholder="Contoh: Waiting Purchasing, Completed..."></div>
+        <div class="fg"><label data-i18n="field_target">Target Selesai</label><input type="text" id="fu-target" data-i18n-ph="ph_target" placeholder="End of Month / tanggal"></div>
+        <div class="fg"><label data-i18n="field_done_date">Tanggal Selesai</label><input type="date" id="fu-selesai"></div>
+        <div class="fg full"><label data-i18n="field_update_note">Catatan Update</label><textarea id="fu-ket" data-i18n-ph="ph_update_note" placeholder="Keterangan update terbaru..." style="min-height:60px"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-cancel" onclick="closeModal('modal-update')" data-i18n="btn_cancel">Batal</button>
+      <button class="btn-save green" onclick="doUpdateIssue()" data-i18n="btn_update">Update</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- ═══════════════════════════════════════
+     GOOGLE SHEETS SYNC (pengganti Firebase)
+     ═══════════════════════════════════════ -->
+<script>
+// ═══════════════════════════════════════
+// GANTI URL DI BAWAH dengan Web App URL dari Apps Script kamu
+// (didapat setelah Deploy > New deployment > Web app)
+// ═══════════════════════════════════════
+const SHEETS_API_URL = "https://script.google.com/macros/s/AKfycbypZ0jIFm-GReipXlzZRbH3IeQMVNkc_okpLsGEEsjxlMfAR_UGTQW-eEiw8cQICkX9-g/exec";
+const SYNC_INTERVAL_MS = 4000; // cek update tiap 4 detik
+
+let fbDb = null;      // tidak dipakai lagi, dibiarkan biar kode lain tetap jalan
+let fbLive = false;   // true kalau Sheets API berhasil konek
+let syncTimer = null;
+
+function fbSetStatus(state) {
+  // state: 'connecting' | 'live' | 'offline'
+  const dot = document.getElementById('fb-status-dot');
+  const label = document.getElementById('fb-status-label');
+  if (!dot || !label) return;
+  const map = {
+    connecting: { color: '#FFCB45', text: currentLang==='en'?'Connecting…':currentLang==='ko'?'연결 중…':'Menyambungkan…' },
+    live:       { color: '#05CD44', text: currentLang==='en'?'Live · synced':currentLang==='ko'?'실시간 동기화':'Live · tersinkron' },
+    offline:    { color: '#E31A1A', text: currentLang==='en'?'Offline (local only)':currentLang==='ko'?'오프라인(로컬)':'Offline (lokal saja)' },
+  };
+  const s = map[state] || map.offline;
+  dot.style.background = s.color;
+  label.textContent = s.text;
+}
+
+function fbInit() {
+  if (!SHEETS_API_URL || SHEETS_API_URL.indexOf('PASTE_') === 0) {
+    console.warn('Google Sheets API URL belum diisi — jalan mode lokal saja (tidak sinkron antar user).');
+    fbSetStatus('offline');
+    return;
+  }
+  fbSetStatus('connecting');
+  sheetsFetchAll(true);
+}
+
+// Ambil semua data terbaru dari Google Sheets dan render ulang.
+// isFirstLoad=true akan menyalakan polling berkala setelah load pertama sukses.
+async function sheetsFetchAll(isFirstLoad) {
+  try {
+    const res = await fetch(SHEETS_API_URL + '?action=read');
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || 'read failed');
+    DB.activities = (json.activities || []).sort((a,b) => (b.tanggal||'').localeCompare(a.tanggal||''));
+    DB.issues = (json.issues || []).sort((a,b) => (b.tanggal||'').localeCompare(a.tanggal||''));
+    fbLive = true;
+    fbSetStatus('live');
+    renderAll();
+    if (isFirstLoad && !syncTimer) {
+      syncTimer = setInterval(() => sheetsFetchAll(false), SYNC_INTERVAL_MS);
+    }
+  } catch (err) {
+    console.error('Sheets fetch error:', err);
+    fbSetStatus('offline');
+  }
+}
+
+// Kirim perubahan (add/update/delete) ke Google Sheets, lalu langsung
+// tarik ulang data terbaru supaya tampilan update seketika (tidak
+// perlu menunggu siklus polling berikutnya).
+async function sheetsSend(payload) {
+  try {
+    const res = await fetch(SHEETS_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // hindari CORS preflight
+      body: JSON.stringify(payload)
+    });
+    const json = await res.json();
+    if (!json.ok) throw new Error(json.error || 'write failed');
+    await sheetsFetchAll(false);
+    return json;
+  } catch (err) {
+    console.error('Sheets sync error:', err);
+    toast(t('toast_err_sync'));
+    throw err;
+  }
+}
+</script>
+
+<script>
+// ═══════════════════════════════════════
+// I18N — TRILINGUAL SYSTEM
+// ═══════════════════════════════════════
+const LANG = {
+  id: {
+    login_pw_ph: 'Password PIC...',
+    login_err: 'Password salah. Coba lagi.',
+    login_title: 'Dashboard JJ & JJ2',
+    login_sub: 'Daily Monitoring · Field Operations',
+    login_btn: 'Masuk sebagai PIC →',
+    login_viewer: 'Lihat dashboard saja (tanpa login)',
+    nav_main: 'MENU',
+    nav_overview: 'Overview',
+    nav_activities: 'Aktivitas Harian',
+    nav_issues: 'Pemantauan Isu',
+    nav_reports: 'Daily Report',
+    role_viewer: 'Hanya Lihat',
+    role_pic: 'PIC Mode',
+    pic_mode: 'PIC Mode',
+    page_overview_title: 'Dashboard Overview',
+    page_overview_sub: 'JJ & JJ2 Factory — Monitoring Real-time',
+    kpi_activities: 'Total Aktivitas',
+    kpi_all_factory: 'Semua factory',
+    kpi_open_issues: 'Issue Open',
+    kpi_not_done: 'Belum selesai',
+    kpi_total_issues: 'Total Issue',
+    kpi_reports: 'Daily Report',
+    kpi_reports_in: 'Laporan masuk',
+    kpi_days: 'Hari Laporan',
+    kpi_unique_dates: 'Tanggal unik',
+    chart_by_dept: 'Aktivitas per Departemen',
+    chart_top8: 'Top 8',
+    chart_by_date: 'Aktivitas per Tanggal',
+    chart_last10: '10 terakhir',
+    chart_priority: 'Issue per Prioritas',
+    chart_status: 'Issue per Status',
+    summary_activity: 'Ringkasan Aktivitas — Factory',
+    tbl_factory: 'Factory',
+    tbl_total_act: 'Total Aktivitas',
+    tbl_completed: 'Completed',
+    tbl_in_progress: 'In Progress',
+    tbl_completion_rate: 'Tingkat Penyelesaian',
+    act_sub: 'Semua aktivitas lapangan JJ & JJ2',
+    iss_sub: 'Pemantauan isu aktif & riwayat penyelesaian',
+    rep_sub: 'Laporan harian aktivitas dan temuan',
+    all_factory: 'Semua Factory',
+    all_dept: 'Semua Dept',
+    all_priority: 'Semua Prioritas',
+    search_ph: 'Cari...',
+    col_date: 'Tanggal', col_factory: 'Factory', col_pic: 'PIC',
+    col_dept: 'Departemen', col_desc: 'Deskripsi', col_status: 'Status',
+    col_item: 'Item Order', col_vendor: 'Vendor', col_issue: 'Deskripsi Issue',
+    col_priority: 'Prioritas', col_progress: 'Progress Issue',
+    daily_report_title: 'LAPORAN HARIAN — PEMANTAUAN ISU', col_shi_pic: 'PIC Dept SHI',
+    col_user: 'User', col_begin_issue: 'Awal Isu', col_target: 'Target Selesai', col_finish: 'Tanggal Selesai',
+    fab_issue: 'Issue Baru', fab_activity: 'Aktivitas',
+    modal_add_activity: 'Tambah Aktivitas Harian',
+    modal_add_issue: 'Tambah Issue Baru',
+    modal_add_report: 'Tambah Daily Report',
+    modal_update_issue: 'Update Progress Issue',
+    field_date: 'Tanggal', field_factory: 'Factory',
+    field_pic_name: 'Nama PIC', field_dept: 'Departemen',
+    field_desc: 'Deskripsi Aktivitas', field_note: 'Keterangan',
+    field_status: 'Status', field_issue_desc: 'Deskripsi Issue',
+    st_completed: 'Selesai', st_in_progress: 'Berlangsung', st_on_hold: 'Ditunda', st_waiting: 'Menunggu',
+    field_init_progress: 'Progress Awal', field_target: 'Target Selesai',
+    field_activity_desc: 'Deskripsi Kegiatan', field_remark: 'Hasil / Remark',
+    field_current_progress: 'Progress Terkini', field_done_date: 'Tanggal Selesai',
+    field_update_note: 'Catatan Update',
+    btn_cancel: 'Batal', btn_save_activity: 'Simpan Aktivitas',
+    btn_save_issue: 'Simpan Issue', btn_save_report: 'Simpan Laporan',
+    btn_update: 'Update', btn_delete: 'Hapus', btn_edit: 'Edit',
+    modal_edit_activity: 'Edit Aktivitas Harian', modal_edit_issue: 'Edit Issue',
+    btn_save_changes: 'Simpan Perubahan', confirm_delete_act: 'Hapus aktivitas ini?',
+    confirm_delete_iss: 'Hapus issue ini?',
+    toast_err_fill: '⚠ Lengkapi field bertanda *',
+    toast_act_saved: '✓ Aktivitas berhasil ditambahkan',
+    toast_iss_saved: '✓ Issue berhasil ditambahkan',
+    toast_rep_saved: '✓ Daily report berhasil disimpan',
+    toast_iss_updated: '✓ Issue diupdate',
+    toast_err_progress: '⚠ Isi progress terkini',
+    toast_err_sync: '⚠ Gagal sinkron ke server, cek koneksi internet',
+    empty_act: 'Tidak ada data',
+    empty_iss: 'Tidak ada issue',
+    empty_rep: 'Belum ada laporan.',
+    empty_pic_suffix_act: ' — klik tombol biru untuk tambah',
+    empty_pic_suffix_iss: ' — klik tombol merah untuk tambah',
+    empty_pic_rep: 'Belum ada laporan. Klik tombol hijau untuk tambah.',
+    act_title: 'Aktivitas Harian', iss_title: 'Pemantauan Isu', rep_title: 'Daily Report (Laporan Harian)',
+    ov_issue_health: 'Status Kesehatan Issue',
+    ov_issue_breakdown: 'Distribusi Status Issue',
+    ov_factory_perf: 'Performa Factory',
+    ov_quick_stats: 'Insight Cepat',
+    ov_recent_issues: 'Issue Terkini',
+    ov_recent_activity: 'Aktivitas Terkini',
+    ov_issue_resolution: 'Tingkat Resolusi Issue',
+    ov_high_issues: 'Issue High Priority',
+    ov_completion_rate: 'Completion Rate Keseluruhan',
+    ov_active_days: 'Hari Aktif Laporan',
+    ov_resolved_issues: 'Issue Terselesaikan',
+    ov_open_label: 'Terbuka',
+    ov_resolved_label: 'Selesai',
+    ov_in_progress_label: 'Dalam Proses',
+    ov_no_issues: 'Tidak ada issue aktif',
+    ov_no_activity: 'Tidak ada aktivitas',
+    ph_full_name: 'Nama lengkap',
+    ph_dept: 'MRO, PS, MEP...',
+    ph_activity_desc: 'Jelaskan aktivitas yang dilakukan...',
+    ph_optional_note: 'Catatan (opsional)',
+    ph_pic_name: 'Nama PIC',
+    ph_dept_issue: 'RSM, MATERIAL...',
+    ph_item: 'Nama item / barang',
+    ph_vendor: 'Nama vendor',
+    ph_issue_desc: 'Jelaskan issue secara detail...',
+    ph_init_progress: 'Status saat ini',
+    ph_target: 'End of Month / tanggal target',
+    ph_today_activity: 'Apa yang dikerjakan hari ini...',
+    ph_remark: 'Hasil, catatan, tindak lanjut...',
+    ph_current_progress: 'Contoh: Waiting Purchasing, Completed...',
+    ph_update_note: 'Keterangan update terbaru...',
+    label_total_issues: 'total issue',
+    label_acts_count: 'aktivitas',
+    label_orig_lang: '(konten dalam bahasa asli)',
+  },
+  en: {
+    login_pw_ph: 'PIC Password...',
+    login_err: 'Wrong password. Try again.',
+    login_title: 'Dashboard JJ & JJ2',
+    login_sub: 'Daily Monitoring · Field Operations',
+    login_btn: 'Login as PIC →',
+    login_viewer: 'View dashboard only (no login)',
+    nav_main: 'MENU',
+    nav_overview: 'Overview',
+    nav_activities: 'Daily Activities',
+    nav_issues: 'Issue Monitoring',
+    nav_reports: 'Daily Report',
+    role_viewer: 'View Only',
+    role_pic: 'PIC Mode',
+    pic_mode: 'PIC Mode',
+    page_overview_title: 'Dashboard Overview',
+    page_overview_sub: 'JJ & JJ2 Factory — Real-time Monitoring',
+    kpi_activities: 'Total Activities',
+    kpi_all_factory: 'All factories',
+    kpi_open_issues: 'Open Issues',
+    kpi_not_done: 'Not yet resolved',
+    kpi_total_issues: 'Total Issues',
+    kpi_reports: 'Daily Reports',
+    kpi_reports_in: 'Reports received',
+    kpi_days: 'Report Days',
+    kpi_unique_dates: 'Unique dates',
+    chart_by_dept: 'Activities by Department',
+    chart_top8: 'Top 8',
+    chart_by_date: 'Activities by Date',
+    chart_last10: 'Last 10',
+    chart_priority: 'Issues by Priority',
+    chart_status: 'Issues by Status',
+    summary_activity: 'Activity Summary — Factory',
+    tbl_factory: 'Factory',
+    tbl_total_act: 'Total Activities',
+    tbl_completed: 'Completed',
+    tbl_in_progress: 'In Progress',
+    tbl_completion_rate: 'Completion Rate',
+    act_sub: 'All field activities JJ & JJ2',
+    iss_sub: 'Active issue monitoring & resolution history',
+    rep_sub: 'Daily activity and findings reports',
+    all_factory: 'All Factories',
+    all_dept: 'All Depts',
+    all_priority: 'All Priorities',
+    search_ph: 'Search...',
+    col_date: 'Date', col_factory: 'Factory', col_pic: 'PIC',
+    col_dept: 'Department', col_desc: 'Description', col_status: 'Status',
+    col_item: 'Item Order', col_vendor: 'Vendor', col_issue: 'Issue Description',
+    col_priority: 'Priority', col_progress: 'Issue Progress',
+    daily_report_title: 'DAILY REPORT — ISSUE MONITORING', col_shi_pic: 'SHI Dept PIC',
+    col_user: 'User', col_begin_issue: 'Beginning Issue', col_target: 'Target Finish Date', col_finish: 'Finish Date',
+    fab_issue: 'New Issue', fab_activity: 'Activity',
+    modal_add_activity: 'Add Daily Activity',
+    modal_add_issue: 'Add New Issue',
+    modal_add_report: 'Add Daily Report',
+    modal_update_issue: 'Update Issue Progress',
+    field_date: 'Date', field_factory: 'Factory',
+    field_pic_name: 'PIC Name', field_dept: 'Department',
+    field_desc: 'Activity Description', field_note: 'Notes',
+    field_status: 'Status', field_issue_desc: 'Issue Description',
+    st_completed: 'Completed', st_in_progress: 'In Progress', st_on_hold: 'On Hold', st_waiting: 'Waiting',
+    field_init_progress: 'Initial Progress', field_target: 'Target Date',
+    field_activity_desc: 'Activity Description', field_remark: 'Result / Remark',
+    field_current_progress: 'Current Progress', field_done_date: 'Completion Date',
+    field_update_note: 'Update Notes',
+    btn_cancel: 'Cancel', btn_save_activity: 'Save Activity',
+    btn_save_issue: 'Save Issue', btn_save_report: 'Save Report',
+    btn_update: 'Update', btn_delete: 'Delete', btn_edit: 'Edit',
+    modal_edit_activity: 'Edit Daily Activity', modal_edit_issue: 'Edit Issue',
+    btn_save_changes: 'Save Changes', confirm_delete_act: 'Delete this activity?',
+    confirm_delete_iss: 'Delete this issue?',
+    toast_err_fill: '⚠ Please fill in required fields',
+    toast_act_saved: '✓ Activity added successfully',
+    toast_iss_saved: '✓ Issue added successfully',
+    toast_rep_saved: '✓ Daily report saved',
+    toast_iss_updated: '✓ Issue updated',
+    toast_err_progress: '⚠ Please enter current progress',
+    toast_err_sync: '⚠ Failed to sync to server, check internet connection',
+    empty_act: 'No data found',
+    empty_iss: 'No issues found',
+    empty_rep: 'No reports yet.',
+    empty_pic_suffix_act: ' — click blue button to add',
+    empty_pic_suffix_iss: ' — click red button to add',
+    empty_pic_rep: 'No reports yet. Click green button to add.',
+    act_title: 'Daily Activities', iss_title: 'Issue Monitoring', rep_title: 'Daily Report',
+    ov_issue_health: 'Issue Health Status',
+    ov_issue_breakdown: 'Issue Status Breakdown',
+    ov_factory_perf: 'Factory Performance',
+    ov_quick_stats: 'Quick Insights',
+    ov_recent_issues: 'Recent Issues',
+    ov_recent_activity: 'Recent Activity',
+    ov_issue_resolution: 'Issue Resolution Rate',
+    ov_high_issues: 'High Priority Issues',
+    ov_completion_rate: 'Overall Completion Rate',
+    ov_active_days: 'Active Report Days',
+    ov_resolved_issues: 'Resolved Issues',
+    ov_open_label: 'Open',
+    ov_resolved_label: 'Resolved',
+    ov_in_progress_label: 'In Progress',
+    ov_no_issues: 'No active issues',
+    ov_no_activity: 'No recent activity',
+    ph_full_name: 'Full name',
+    ph_dept: 'MRO, PS, MEP...',
+    ph_activity_desc: 'Describe the activity performed...',
+    ph_optional_note: 'Notes (optional)',
+    ph_pic_name: 'PIC name',
+    ph_dept_issue: 'RSM, MATERIAL...',
+    ph_item: 'Item / goods name',
+    ph_vendor: 'Vendor name',
+    ph_issue_desc: 'Describe the issue in detail...',
+    ph_init_progress: 'Current status',
+    ph_target: 'End of Month / target date',
+    ph_today_activity: 'What was done today...',
+    ph_remark: 'Results, notes, follow-up...',
+    ph_current_progress: 'e.g. Waiting Purchasing, Completed...',
+    ph_update_note: 'Latest update notes...',
+    label_total_issues: 'total issues',
+    label_acts_count: 'activities',
+    label_orig_lang: '(content in original language)',
+  },
+  ko: {
+    login_pw_ph: 'PIC 비밀번호...',
+    login_err: '비밀번호가 틀렸습니다. 다시 시도하세요.',
+    login_title: '대시보드 JJ & JJ2',
+    login_sub: '일일 모니터링 · 현장 운영',
+    login_btn: 'PIC로 로그인 →',
+    login_viewer: '로그인 없이 대시보드 보기',
+    nav_main: '메뉴',
+    nav_overview: '개요',
+    nav_activities: '일일 활동',
+    nav_issues: '이슈 모니터링',
+    nav_reports: '일일 보고서',
+    role_viewer: '보기 전용',
+    role_pic: 'PIC 모드',
+    pic_mode: 'PIC 모드',
+    page_overview_title: '대시보드 개요',
+    page_overview_sub: 'JJ & JJ2 공장 — 실시간 모니터링',
+    kpi_activities: '총 활동',
+    kpi_all_factory: '모든 공장',
+    kpi_open_issues: '미해결 이슈',
+    kpi_not_done: '미완료',
+    kpi_total_issues: '총 이슈',
+    kpi_reports: '일일 보고서',
+    kpi_reports_in: '보고서 수신',
+    kpi_days: '보고 일수',
+    kpi_unique_dates: '고유 날짜',
+    chart_by_dept: '부서별 활동',
+    chart_top8: '상위 8개',
+    chart_by_date: '날짜별 활동',
+    chart_last10: '최근 10개',
+    chart_priority: '우선순위별 이슈',
+    chart_status: '상태별 이슈',
+    summary_activity: '활동 요약 — 공장',
+    tbl_factory: '공장',
+    tbl_total_act: '총 활동',
+    tbl_completed: '완료',
+    tbl_in_progress: '진행 중',
+    tbl_completion_rate: '완료율',
+    act_sub: 'JJ & JJ2 모든 현장 활동',
+    iss_sub: '활성 이슈 모니터링 및 해결 이력',
+    rep_sub: '일일 활동 및 발견 사항 보고서',
+    all_factory: '모든 공장',
+    all_dept: '모든 부서',
+    all_priority: '모든 우선순위',
+    search_ph: '검색...',
+    col_date: '날짜', col_factory: '공장', col_pic: 'PIC',
+    col_dept: '부서', col_desc: '설명', col_status: '상태',
+    col_item: '주문 품목', col_vendor: '공급업체', col_issue: '이슈 설명',
+    col_priority: '우선순위', col_progress: '이슈 진행 상황',
+    daily_report_title: '일일 보고서 — 이슈 모니터링', col_shi_pic: 'SHI 부서 PIC',
+    col_user: '사용자', col_begin_issue: '초기 이슈', col_target: '목표 완료일', col_finish: '완료일',
+    fab_issue: '새 이슈', fab_activity: '활동 추가',
+    modal_add_activity: '일일 활동 추가',
+    modal_add_issue: '새 이슈 추가',
+    modal_add_report: '일일 보고서 추가',
+    modal_update_issue: '이슈 진행 상황 업데이트',
+    field_date: '날짜', field_factory: '공장',
+    field_pic_name: 'PIC 이름', field_dept: '부서',
+    field_desc: '활동 설명', field_note: '메모',
+    field_status: '상태', field_issue_desc: '이슈 설명',
+    st_completed: '완료', st_in_progress: '진행 중', st_on_hold: '보류', st_waiting: '대기',
+    field_init_progress: '초기 진행 상황', field_target: '목표 날짜',
+    field_activity_desc: '활동 설명', field_remark: '결과 / 비고',
+    field_current_progress: '현재 진행 상황', field_done_date: '완료 날짜',
+    field_update_note: '업데이트 메모',
+    btn_cancel: '취소', btn_save_activity: '활동 저장',
+    btn_save_issue: '이슈 저장', btn_save_report: '보고서 저장',
+    btn_update: '업데이트', btn_delete: '삭제', btn_edit: '편집',
+    modal_edit_activity: '일일 활동 편집', modal_edit_issue: '이슈 편집',
+    btn_save_changes: '변경사항 저장', confirm_delete_act: '이 활동을 삭제하시겠습니까?',
+    confirm_delete_iss: '이 이슈를 삭제하시겠습니까?',
+    toast_err_fill: '⚠ 필수 항목을 모두 입력해 주세요',
+    toast_act_saved: '✓ 활동이 추가되었습니다',
+    toast_iss_saved: '✓ 이슈가 추가되었습니다',
+    toast_rep_saved: '✓ 일일 보고서가 저장되었습니다',
+    toast_iss_updated: '✓ 이슈가 업데이트되었습니다',
+    toast_err_progress: '⚠ 현재 진행 상황을 입력해 주세요',
+    toast_err_sync: '⚠ 서버 동기화 실패, 인터넷 연결을 확인하세요',
+    empty_act: '데이터 없음',
+    empty_iss: '이슈 없음',
+    empty_rep: '아직 보고서가 없습니다.',
+    empty_pic_suffix_act: ' — 파란 버튼을 클릭하여 추가',
+    empty_pic_suffix_iss: ' — 빨간 버튼을 클릭하여 추가',
+    empty_pic_rep: '아직 보고서가 없습니다. 녹색 버튼을 클릭하여 추가하세요.',
+    act_title: '일일 활동', iss_title: '이슈 모니터링', rep_title: '일일 보고서',
+    ov_issue_health: '이슈 건강 상태',
+    ov_issue_breakdown: '이슈 상태 분포',
+    ov_factory_perf: '공장 성과',
+    ov_quick_stats: '빠른 인사이트',
+    ov_recent_issues: '최근 이슈',
+    ov_recent_activity: '최근 활동',
+    ov_issue_resolution: '이슈 해결률',
+    ov_high_issues: '높은 우선순위 이슈',
+    ov_completion_rate: '전체 완료율',
+    ov_active_days: '활성 보고 일수',
+    ov_resolved_issues: '해결된 이슈',
+    ov_open_label: '미결',
+    ov_resolved_label: '해결',
+    ov_in_progress_label: '진행 중',
+    ov_no_issues: '활성 이슈 없음',
+    ov_no_activity: '최근 활동 없음',
+    ph_full_name: '성명',
+    ph_dept: 'MRO, PS, MEP...',
+    ph_activity_desc: '수행한 활동을 설명하세요...',
+    ph_optional_note: '메모 (선택사항)',
+    ph_pic_name: 'PIC 이름',
+    ph_dept_issue: 'RSM, MATERIAL...',
+    ph_item: '항목 / 제품명',
+    ph_vendor: '공급업체 이름',
+    ph_issue_desc: '이슈를 자세히 설명하세요...',
+    ph_init_progress: '현재 상태',
+    ph_target: 'EOM / 목표 날짜',
+    ph_today_activity: '오늘 수행한 작업...',
+    ph_remark: '결과, 메모, 후속 조치...',
+    ph_current_progress: '예: Waiting Purchasing, Completed...',
+    ph_update_note: '최신 업데이트 메모...',
+    label_total_issues: '총 이슈',
+    label_acts_count: '활동',
+    label_orig_lang: '(원본 언어로 작성된 내용)',
+  }
+};
+
+let currentLang = 'id';
+let currentLangBtnsLogin = null;
+let currentLangBtnsBar = null;
+
+function t(key) {
+  return (LANG[currentLang] && LANG[currentLang][key]) || LANG.id[key] || key;
+}
+
+function setLang(lang, btn, source) {
+  currentLang = lang;
+
+  // Update login lang buttons
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  // Update bar lang pills
+  document.querySelectorAll('.lang-pill').forEach(b => b.classList.remove('active'));
+
+  if (source === 'bar') {
+    // Also update login buttons
+    document.querySelectorAll('.lang-btn').forEach(b => {
+      if (b.textContent.includes(lang === 'id' ? 'Indonesia' : lang === 'en' ? 'English' : '한국어')) b.classList.add('active');
+    });
+    document.querySelectorAll('.lang-pill').forEach(b => {
+      if (b.textContent.trim() === lang.toUpperCase()) b.classList.add('active');
+    });
+  } else {
+    btn.classList.add('active');
+    document.querySelectorAll('.lang-pill').forEach(b => {
+      if (b.textContent.trim() === lang.toUpperCase()) b.classList.add('active');
+    });
+  }
+
+  renderAll();
+  applyTranslations();
+}
+
+function applyTranslations() {
+  // Update all data-i18n elements
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    const txt = t(key);
+    // Preserve required star
+    if (el.querySelector('.req')) {
+      el.childNodes[0].textContent = txt;
+    } else if (el.children.length > 0) {
+      // Has child elements (e.g. SVG icons) — only update text nodes, don't wipe children
+      for (const node of el.childNodes) {
+        if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+          node.textContent = txt;
+          break;
+        }
+      }
+    } else {
+      el.textContent = txt;
+    }
+  });
+  // Update placeholders
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    el.placeholder = t(el.getAttribute('data-i18n-ph'));
+  });
+  // Dynamic text
+  document.getElementById('login-err').textContent = t('login_err');
+  document.getElementById('login-title').textContent = t('login_title');
+  document.getElementById('login-sub').textContent = t('login_sub');
+  document.getElementById('login-btn').textContent = t('login_btn');
+  document.getElementById('login-viewer-link').textContent = t('login_viewer');
+  // Update password placeholder
+  const pwInput = document.getElementById('pw-input');
+  if (pwInput) pwInput.placeholder = t('login_pw_ph');
+  // Update search placeholders
+  ['act-q','iss-q'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.placeholder = t('search_ph');
+  });
+  // Update date locale
+  const dateLocale = currentLang === 'id' ? 'id-ID' : currentLang === 'ko' ? 'ko-KR' : 'en-US';
+  document.getElementById('topbar-date').textContent =
+    new Date().toLocaleDateString(dateLocale, {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+  // th-upd / th-act-upd
+  if (isPIC) {
+    const actionLabel = currentLang === 'ko' ? '작업' : currentLang === 'en' ? 'Action' : 'Aksi';
+    document.getElementById('th-upd').textContent = actionLabel;
+    document.getElementById('th-act-upd').textContent = actionLabel;
+  }
+
+  // Topbar title (hardcoded, update manually)
+  const topbarTitle = document.getElementById('topbar-title');
+  if (topbarTitle) topbarTitle.textContent = 'SHI Delegate Dashboard';
+
+  // Page header subtitles — force update by key (some are rendered-only)
+  const subMap = {
+    'page-overview-sub': 'page_overview_sub',
+    'page-act-sub':      'act_sub',
+    'page-iss-sub':      'iss_sub',
+    'page-rep-sub':      'rep_sub',
+  };
+  Object.entries(subMap).forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = t(key);
+  });
+}
+
+// ═══════════════════════════════════════
+// CONFIG
+// ═══════════════════════════════════════
+const PIC_PASSWORD = 'shi2026';
+
+// ═══════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════
+let DB = {
+  activities: [
+    {id:1,tanggal:'2026-07-09',factory:'JJ',pic:'Asep / Agung',dept:'PU Produksi',desc:'Cek proses stamp outsole bersama Team Sales. Tinta Pyramid & LION dipakai di JJ, tidak ada issue.',status:'In Progress',ket:''},
+    {id:2,tanggal:'2026-07-09',factory:'JJ',pic:'Asep / Agung',dept:'DEV TE',desc:'Diskusi sample sticker midsole model baru. Trial 25 Juli, design masih dalam proses.',status:'In Progress',ket:''},
+    {id:3,tanggal:'2026-07-09',factory:'JJ',pic:'Asep / Agung',dept:'LIK',desc:'Penerimaan barang PT LIK: CKE Box Fan Exhaust 48 sebanyak 24 Pcs. Tidak ada issue.',status:'Completed',ket:''},
+    {id:4,tanggal:'2026-07-09',factory:'JJ',pic:'Asep / Agung',dept:'MRO',desc:'Cek & bantu bongkar pengiriman barang reguler. Spesifikasi dan Qty sesuai surat jalan.',status:'In Progress',ket:''},
+    {id:5,tanggal:'2026-07-09',factory:'JJ',pic:'Asep / Agung',dept:'MEP',desc:'Cek & bantu bongkar pengiriman barang reguler. Spesifikasi dan Qty sesuai surat jalan.',status:'In Progress',ket:''},
+    {id:6,tanggal:'2026-07-09',factory:'JJ',pic:'Asep / Agung',dept:'PS',desc:'Pengecekan incoming delivery: Skyfoam, Henkel, Nanpao(×2), Asia Chem, Multi Citra, Shinwoo, Sunjin. No issue.',status:'Completed',ket:''},
+    {id:7,tanggal:'2026-07-08',factory:'JJ',pic:'Agung Saftony',dept:'MRO',desc:'Cek & bantu bongkar pengiriman barang reguler. Tidak ada kekurangan/kesalahan spec.',status:'In Progress',ket:''},
+    {id:8,tanggal:'2026-07-08',factory:'JJ',pic:'Agung Saftony',dept:'MRO',desc:'Pengecekan rak pallet dari PT. Anaszaen (1825×450×1250). Tidak ada issue dari user.',status:'Completed',ket:''},
+    {id:9,tanggal:'2026-07-08',factory:'JJ',pic:'Agung Saftony',dept:'MEP',desc:'Cek & bantu bongkar pengiriman barang reguler. Spesifikasi dan Qty sesuai surat jalan.',status:'In Progress',ket:''},
+    {id:10,tanggal:'2026-07-08',factory:'JJ',pic:'Asep Supriatna',dept:'PS',desc:'Pengecekan incoming: Skyfoam, Kyungsung, Dongsung, General Chem, Asia Chem, Mintra CMB, Kingpole, SU Indonesia, Sandol. No issue.',status:'Completed',ket:''},
+    {id:11,tanggal:'2026-07-07',factory:'JJ',pic:'Agung Saftony',dept:'MRO',desc:'Konfirmasi ulang permintaan kertas label dengan PIC terkait; pemesanan tidak jadi lewat SHI karena termasuk raw material, JJ akan direct ke vendor.',status:'Completed',ket:''},
+    {id:12,tanggal:'2026-07-07',factory:'JJ',pic:'Agung Saftony',dept:'MRO',desc:'Cek & bantu bongkar pengiriman barang reguler pertama. Tidak ada kekurangan/kesalahan spec.',status:'In Progress',ket:''},
+    {id:13,tanggal:'2026-07-07',factory:'JJ',pic:'Agung Saftony',dept:'MEP',desc:'RO 2945: permintaan Quartz Glass 200x150x3mm & Reflector MI mesin UV conveyor (Gedung Bottom). Foto detail spare part sudah dikirim ke Purchasing untuk hindari salah kirim (barang import).',status:'In Progress',ket:'Menunggu proses order import'},
+    {id:14,tanggal:'2026-07-07',factory:'JJ',pic:'Agung Saftony',dept:'MEP',desc:'Komplain Dept LEAN: roda troly kiriman 29 Juni (PO 4501125015) tidak sesuai, dudukan baut tidak cocok. Sample roda yang benar akan dititipkan ke driver.',status:'In Progress',ket:'Menunggu konfirmasi LEAN'},
+    {id:15,tanggal:'2026-07-07',factory:'JJ',pic:'Agung Saftony',dept:'MEP',desc:'Cek & bantu bongkar pengiriman barang reguler pertama. Spesifikasi dan Qty sesuai surat jalan.',status:'In Progress',ket:''},
+    {id:16,tanggal:'2026-07-07',factory:'JJ',pic:'Asep Supriatna',dept:'PS',desc:'Pick up return box dampra 100ea dari JJ oleh driver SHI. Proses muat & hitung selesai, sesuai dokumen.',status:'Completed',ket:''},
+    {id:17,tanggal:'2026-07-07',factory:'JJ',pic:'Asep Supriatna',dept:'PS',desc:'Pengecekan incoming: Skyfoam(×2), Donga, Nanpao(×2), Henkel, Cahari, Buwon, Henkel ID, SU Indonesia, Sunjin. No issue.',status:'Completed',ket:''},
+    {id:18,tanggal:'2026-07-06',factory:'JJ',pic:'Agung Saftony',dept:'MRO',desc:'Sample kertas label dari Mr Kim CE sudah dikirim ke Team Sales untuk info vendor & ketersediaan barang. Sudah dikonfirmasi ke user (Dept Label): dipakai untuk print label barcode.',status:'Completed',ket:''},
+    {id:19,tanggal:'2026-07-06',factory:'JJ',pic:'Agung Saftony',dept:'MRO',desc:'Tatakan stainless laminating: Pak Ali akan proses PO bulan ini untuk 2 meja yang belum terpasang. Ukuran 150cm×1600cm sudah dicek user; penawaran harga sudah diinfokan ke Sales JJ.',status:'In Progress',ket:''},
+    {id:20,tanggal:'2026-07-06',factory:'JJ',pic:'Agung Saftony',dept:'MRO',desc:'Cek & bantu bongkar pengiriman barang reguler pertama (Driver Pak Ujang). Tidak ada kekurangan/kesalahan spec.',status:'In Progress',ket:''},
+    {id:21,tanggal:'2026-07-06',factory:'JJ',pic:'Agung Saftony',dept:'MEP',desc:'Cek & bantu bongkar pengiriman barang reguler pertama (Driver Pak Rian). Tidak ada kekurangan/kesalahan spec.',status:'In Progress',ket:''},
+    {id:22,tanggal:'2026-07-06',factory:'JJ',pic:'Asep Supriatna',dept:'PS',desc:'Pengecekan incoming: Skyfoam(×2), Kyungsung, Hanyoung, Serim, Sunjin, Shinwo Global. No issue.',status:'Completed',ket:''},
+    {id:23,tanggal:'2026-07-04',factory:'JJ',pic:'Agung Saftony',dept:'MRO',desc:'Cek & bantu bongkar pengiriman barang reguler pertama (Driver Pak Widodo). Tidak ada kekurangan/kesalahan spec.',status:'In Progress',ket:''},
+    {id:24,tanggal:'2026-07-04',factory:'JJ',pic:'Agung Saftony',dept:'MRO',desc:'Cek & bantu bongkar pengiriman barang reguler kedua (Driver Pak Eman). Tidak ada kekurangan/kesalahan spec.',status:'In Progress',ket:''},
+    {id:25,tanggal:'2026-07-04',factory:'JJ',pic:'Agung Saftony',dept:'MEP',desc:'Cek & bantu bongkar pengiriman barang reguler kedua. Tidak ada kekurangan/kesalahan spec.',status:'In Progress',ket:''},
+    {id:26,tanggal:'2026-07-04',factory:'JJ',pic:'Agung Saftony',dept:'MEP',desc:'Direct pengiriman mesin DSTC (Sewing JYL) 190 Pcs import. Bongkar terkendala karena tanpa pallet; lembur operator hanya s/d 16:30, container menginap lanjut besok.',status:'In Progress',ket:'Lanjut besok'},
+    {id:27,tanggal:'2026-07-04',factory:'JJ',pic:'Asep Supriatna',dept:'PS',desc:'Pengecekan incoming: Skyfoam, Dongsung, Nanpao(×2), Henkel Footwear, General Chem, Sunglim, Assemindo, SU Indonesia, Idama Era Mandiri. No issue.',status:'Completed',ket:''},
+    {id:28,tanggal:'2026-07-03',factory:'JJ',pic:'Agung Saftony',dept:'MRO',desc:'Cek & bantu bongkar pengiriman barang reguler pertama (Driver Pak Widodo). Tidak ada kekurangan/kesalahan spec.',status:'In Progress',ket:''},
+    {id:29,tanggal:'2026-07-03',factory:'JJ',pic:'Agung Saftony',dept:'MRO',desc:'Cek & bantu bongkar pengiriman barang reguler kedua (Driver Pak Eman). Tidak ada kekurangan/kesalahan spec.',status:'In Progress',ket:''},
+    {id:30,tanggal:'2026-07-03',factory:'JJ',pic:'Agung Saftony',dept:'MEP',desc:'Cek & bantu bongkar pengiriman barang reguler kedua. Tidak ada kekurangan/kesalahan spec.',status:'In Progress',ket:''},
+    {id:31,tanggal:'2026-07-03',factory:'JJ',pic:'Agung Saftony',dept:'MEP',desc:'Direct pengiriman mesin DSTC (Sewing JYL) 190 Pcs import. Bongkar terkendala karena tanpa pallet; lembur operator hanya s/d 16:30, container menginap lanjut besok.',status:'In Progress',ket:'Lanjut besok'},
+    {id:32,tanggal:'2026-07-03',factory:'JJ',pic:'Asep Supriatna',dept:'PS',desc:'Pengecekan incoming: Skyfoam, Dongsung, Nanpao(×2), Henkel Footwear, General Chem, Sunglim, Assemindo, SU Indonesia, Idama Era Mandiri. No issue.',status:'Completed',ket:''},
+    {id:33,tanggal:'2026-07-02',factory:'JJ',pic:'Agung Saftony',dept:'MRO',desc:'Cek & bantu bongkar pengiriman barang reguler pertama (Driver Pak Widodo). Tidak ada kekurangan/kesalahan spec.',status:'In Progress',ket:''},
+    {id:34,tanggal:'2026-07-02',factory:'JJ',pic:'Agung Saftony',dept:'MRO',desc:'Cek & bantu bongkar pengiriman barang reguler kedua (Driver Pak Eman). Tidak ada kekurangan/kesalahan spec.',status:'In Progress',ket:''},
+    {id:35,tanggal:'2026-07-02',factory:'JJ',pic:'Agung Saftony',dept:'MEP',desc:'Cek & bantu bongkar pengiriman barang reguler kedua. Tidak ada kekurangan/kesalahan spec.',status:'In Progress',ket:''},
+    {id:36,tanggal:'2026-07-02',factory:'JJ',pic:'Agung Saftony',dept:'MEP',desc:'Direct pengiriman mesin DSTC (Sewing JYL) 190 Pcs import. Bongkar terkendala karena tanpa pallet; lembur operator hanya s/d 16:30, container menginap lanjut besok.',status:'In Progress',ket:'Lanjut besok'},
+    {id:37,tanggal:'2026-07-02',factory:'JJ',pic:'Asep Supriatna',dept:'PS',desc:'Pengecekan incoming: Skyfoam(×2 armada), Dongsung, Hanyoung, General Chem, Sunjin, Multi Citra, Mitra CMB, Buwon. No issue.',status:'Completed',ket:''},
+    {id:38,tanggal:'2026-07-01',factory:'JJ',pic:'Agung Saftony',dept:'MRO',desc:'Cek & bantu bongkar pengiriman barang reguler pertama. Tidak ada kekurangan/kesalahan spec.',status:'In Progress',ket:''},
+    {id:39,tanggal:'2026-07-01',factory:'JJ',pic:'Agung Saftony',dept:'MRO',desc:'Cek & bantu bongkar pengiriman barang reguler kedua. Tidak ada kekurangan/kesalahan spec.',status:'In Progress',ket:''},
+    {id:40,tanggal:'2026-07-01',factory:'JJ',pic:'Agung Saftony',dept:'MEP',desc:'Direct pengiriman vendor PT Anaszen: Papan Cor 20cm×1,5cm×4M sebanyak 6 lembar. Sesuai, tidak ada kekurangan/kesalahan spec.',status:'Completed',ket:''},
+    {id:41,tanggal:'2026-07-01',factory:'JJ',pic:'Agung Saftony',dept:'MEP',desc:'Direct pengiriman vendor PT Putra Perdana (Project METCON), PO 4501133436/4501133472/4501133455/4501133465/4501133416. Sesuai permintaan.',status:'Completed',ket:''},
+    {id:42,tanggal:'2026-07-01',factory:'JJ',pic:'Asep Supriatna',dept:'PS',desc:'Pengecekan incoming: Skyfoam(×2 armada), Kyungsung, Nanpao(×2), Sunglim, Sunjin, Idaman Era Mandiri, Cahari, Donga. No issue.',status:'Completed',ket:''},
+  ],
+  issues: [
+    {id:1,tanggal:'2026-07-10',factory:'JJ2',pic:'Eulis Nurhernaningsih',dept:'RSM',shiPic:'RSM - Ade',user:'Warehouse APAR',item:'APAR',vendor:'VTM',beginIssue:'Delivery In Out lateness',issue:'Order lateness Delivery In Out — keterlambatan pengambilan tabung APAR kosong',prioritas:'Medium',progress:'Waiting for SHI Follow up',target:'',selesai:'',ket:'Koordinasi sudah dilakukan, menunggu tindak lanjut SHI'},
+    {id:2,tanggal:'2026-07-01',factory:'JJ',pic:'Asep Supriatna',dept:'Consumable - Desy',shiPic:'PS - RA',user:'Plant Prod. Lion Ink Black',item:'Lion Ink Black',vendor:'Asaba',beginIssue:'Ink migration color to upper',issue:'Ink migration color to upper — tinta bermigrasi ke bagian upper',prioritas:'High',progress:'Waiting RSL product from Purchasing',target:'2026-09-29',selesai:'',ket:'Menunggu RSL product dari tim Purchasing'},
+    {id:3,tanggal:'2026-07-01',factory:'JJ',pic:'Agung Saftony',dept:'Material',shiPic:'PS - RA',user:'Warehouse Chemical',item:'Chemical',vendor:'Kyungsung',beginIssue:'Delivery',issue:'Delivery',prioritas:'Low',progress:'Delivery Completed',target:'',selesai:'2026-07-01',ket:'No Issue'},
+    {id:4,tanggal:'2026-07-01',factory:'JJ',pic:'Agung Saftony',dept:'Material',shiPic:'PS - RA',user:'Warehouse Chemical',item:'Chemical',vendor:'Nanpao',beginIssue:'Delivery',issue:'Delivery',prioritas:'Low',progress:'Delivery Completed',target:'',selesai:'2026-07-01',ket:'No Issue'},
+  ],
+  reports: [
+    {id:1,tanggal:'2026-07-10',factory:'JJ2',pic:'Eulis Nurhernaningsih',desc:'Koordinasi dengan vendor VTM terkait mekanisme kedatangan ke area pabrik dan penjadwalan pengambilan tabung APAR kosong. Penegasan prosedur akses kendaraan, pembatasan jam 14.30–16.30 WIB, dan ketentuan parkir.',remark:'Single point of contact untuk vendor · Jadwal APAR berkala · Konfirmasi kedatangan sebelum tiba · Langkah preventif ketertiban operasional.',status:'Completed'},
+    {id:2,tanggal:'2026-07-10',factory:'JJ2',pic:'Eulis Nurhernaningsih',desc:'Penyerahan sampel tinta Pyramid kepada tim CE untuk trial di area produksi Assembling. Evaluasi performa tinta sesuai standar Nike.',remark:'Trial di Assembling dengan material produksi nyata · Evaluasi kualitas marking, daya rekat, kesesuaian Nike · Keputusan menunggu hasil evaluasi.',status:'Completed'},
+    {id:3,tanggal:'2026-07-10',factory:'JJ2',pic:'Ridwan Maulana Firdaus',desc:'Penerimaan material harian: Direct foam (Serim & Sky Foam), direct upper (PT Sunjin, PT SU, Assems), pengiriman regular dari SHI. Pengecekan jumlah, kondisi, dan dokumen.',remark:'Seluruh proses penerimaan, pembongkaran, dan pengecekan berjalan lancar sesuai prosedur.',status:'Completed'},
+  ],
+  nextId: { act: 43, iss: 5, rep: 4 }
+};
+
+// ═══════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════
+let isPIC = false;
+
+function tryLogin() {
+  const pw = document.getElementById('pw-input').value;
+  if (pw === PIC_PASSWORD) {
+    isPIC = true; enterApp();
+  } else {
+    const err = document.getElementById('login-err');
+    err.textContent = t('login_err');
+    err.style.display = 'block';
+    document.getElementById('pw-input').value = '';
+    document.getElementById('pw-input').focus();
+    setTimeout(() => err.style.display = 'none', 3000);
+  }
+}
+
+function enterViewer() { isPIC = false; enterApp(); }
+
+function enterApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+
+  const dateLocale = currentLang === 'id' ? 'id-ID' : currentLang === 'ko' ? 'ko-KR' : 'en-US';
+  document.getElementById('topbar-date').textContent =
+    new Date().toLocaleDateString(dateLocale, {weekday:'long', year:'numeric', month:'long', day:'numeric'});
+
+  if (isPIC) {
+    document.getElementById('pic-chip').style.display = 'flex';
+    document.getElementById('fab-group').classList.add('visible');
+    const actionLabel = currentLang === 'ko' ? '작업' : currentLang === 'en' ? 'Action' : 'Aksi';
+    document.getElementById('th-upd').textContent = actionLabel;
+    document.getElementById('th-act-upd').textContent = actionLabel;
+    document.getElementById('sidebar-name').textContent = 'PIC';
+    document.getElementById('sidebar-avatar').textContent = 'P';
+    document.getElementById('sidebar-role').textContent = t('role_pic');
+
+
+  }
+  renderAll();
+  if (!fbLive) fbInit(); // only connect once, even if enterApp() runs again
+}
+
+function doLogout() {
+  isPIC = false;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('pw-input').value = '';
+  document.getElementById('login-err').style.display = 'none';
+  document.getElementById('fab-group').classList.remove('visible');
+  document.getElementById('pic-chip').style.display = 'none';
+
+  document.getElementById('sidebar-name').textContent = 'Viewer';
+  document.getElementById('sidebar-avatar').textContent = 'V';
+  document.getElementById('sidebar-role').textContent = t('role_viewer');
+}
+
+// ═══════════════════════════════════════
+// RENDER ALL
+// ═══════════════════════════════════════
+let charts = {};
+
+// Helper: format tanggal → 01-Jul-26
+// Handles YYYY-MM-DD (date input) and dd-mm-YYYY (legacy)
+function fmtDate(dateStr) {
+  if (!dateStr) return '—';
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const parts = dateStr.split('-');
+  if (parts.length !== 3) return dateStr;
+  let yyyy, mm, dd;
+  if (parts[0].length === 4) {
+    // YYYY-MM-DD
+    yyyy = parts[0]; mm = parseInt(parts[1], 10) - 1; dd = String(parseInt(parts[2], 10)).padStart(2, '0');
+  } else {
+    // dd-mm-YYYY (legacy)
+    dd = String(parseInt(parts[0], 10)).padStart(2, '0'); mm = parseInt(parts[1], 10) - 1; yyyy = parts[2];
+  }
+  const yy = yyyy.slice(2);
+  if (mm < 0 || mm > 11) return dateStr;
+  return `${dd}-${MONTHS[mm]}-${yy}`;
+}
+
+function renderAll() {
+  renderKPI(); renderOverviewSignals(); renderDeptMatrix(); renderIssueScorecard();
+  renderResolutionNew(); renderFactoryGauges(); renderDateBarsNew();
+  renderOvIssueHeat(); renderOvFeed(); renderDeptRank();
+  renderDeptBars(); renderDateBars();
+  renderIssueHealth(); renderFactoryPerf(); renderQuickInsights();
+  renderPriorityBreakdown(); renderResolutionRing();
+  renderRecentIssues(); renderRecentActivity();
+  renderChartPrior(); renderChartStatus(); renderSummary();
+  renderActTable(); renderIssTable();
+  renderMonAlerts();
+  populateDeptFilter();
+  applyTranslations();
+}
+
+function renderMonAlerts() {
+  const el = document.getElementById('mon-alerts');
+  if (!el) return;
+  const total = DB.activities.length;
+  const done = DB.activities.filter(a => /completed/i.test(a.status)).length;
+  const rate = total ? Math.round(done/total*100) : 0;
+  const openIssues = DB.issues.filter(isOpenIssue);
+  const highOpen = openIssues.filter(i => /high/i.test(i.prioritas));
+  const dates = [...new Set(DB.activities.map(a=>a.tanggal))].sort().reverse();
+  const lastDate = dates[0] || '—';
+  const factCounts = {};
+  DB.activities.forEach(a => { factCounts[a.factory]=(factCounts[a.factory]||0)+1; });
+  const sortedFacts = Object.entries(factCounts).sort((a,b)=>b[1]-a[1]);
+  const topFactory = sortedFacts[0]?.[0]||'—';
+
+  const alerts = [];
+
+  // High priority open issues
+  if (highOpen.length) {
+    alerts.push({ type: 'red', text: `Issue High Priority OPEN: ${highOpen.length} issue — ${highOpen.map(i=>i.item+' ('+i.vendor+')').join(', ')}` });
+  }
+
+  // Low completion rate
+  if (rate < 40 && total > 0) {
+    alerts.push({ type: 'amber', text: `Completion rate rendah: ${rate}% — dari ${total} aktivitas, baru ${done} selesai` });
+  } else if (rate >= 70) {
+    alerts.push({ type: 'green', text: `Completion rate baik: ${rate}% — ${done} dari ${total} aktivitas selesai` });
+  } else if (total > 0) {
+    alerts.push({ type: 'amber', text: `Completion rate: ${rate}% — ${done} dari ${total} aktivitas selesai (target ≥70%)` });
+  }
+
+  // Reports
+  if (false) {
+    
+  } else {
+    
+  }
+
+  // Most active factory
+  alerts.push({ type: 'blue', text: `Factory teraktif: ${topFactory} dengan ${factCounts[topFactory]||0} aktivitas — ${Object.entries(factCounts).map(([f,n])=>f+': '+n).join(', ')}` });
+
+  // Last update
+  alerts.push({ type: 'green', text: `Update terakhir: ${lastDate} — total ${dates.length} hari aktif lapangan` });
+
+  el.innerHTML = alerts.map(a => `
+    <div class="mon-alert-item ${a.type}">
+      <div class="mon-alert-dot ${a.type}"></div>
+      <div>${a.text}</div>
+    </div>`).join('');
+}
+
+function renderKPI() {
+  const total = DB.issues.length;
+  const open = DB.issues.filter(i => !['Delivery Completed','Completed','Closed'].includes(i.progress)).length;
+  const dates = [...new Set(DB.activities.map(a => a.tanggal))].length;
+  const done = DB.activities.filter(a => /completed/i.test(a.status)).length;
+  const rate = DB.activities.length ? Math.round(done / DB.activities.length * 100) : 0;
+
+  document.getElementById('kpi-act').textContent  = DB.activities.length;
+  document.getElementById('kpi-open').textContent = open;
+  document.getElementById('kpi-iss') && (document.getElementById('kpi-iss').textContent = total);
+  document.getElementById('kpi-rep').textContent  = [...new Set(DB.activities.map(a=>a.tanggal))].length;
+  document.getElementById('kpi-days').textContent = dates;
+  document.getElementById('kpi-rate').textContent = rate + '%';
+
+  // meta text
+  const openMeta = document.getElementById('kpi-open-meta');
+  if (openMeta) openMeta.textContent = `dari ${total} total issue`;
+  const rateMeta = document.getElementById('kpi-rate-meta');
+  if (rateMeta) rateMeta.textContent = `${done} dari ${DB.activities.length} aktivitas`;
+  const repMeta = document.getElementById('kpi-rep-meta');
+  if (repMeta) repMeta.textContent = 'JJ + JJ2';
+  const daysMeta = document.getElementById('kpi-days-meta');
+  if (daysMeta) daysMeta.style.display = 'none';
+
+  // mini bars (legacy — now in mon-kpi-bar-wrap)
+  const openBar = document.getElementById('kpi-open-bar');
+  if (openBar) openBar.style.width = (total ? Math.round(open/total*100) : 0) + '%';
+  const rateBar = document.getElementById('kpi-rate-bar');
+  if (rateBar) { rateBar.style.width = rate + '%'; }
+  // badge row for open issues
+  const badgeEl = document.getElementById('kpi-open-badge');
+  if (badgeEl) {
+    const highOpen = DB.issues.filter(i => /high/i.test(i.prioritas) && !isResolved(i)).length;
+    badgeEl.innerHTML = highOpen
+      ? `<span style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:6px;background:rgba(227,26,26,.1);color:#E31A1A">▲ ${highOpen} High</span>`
+      : '';
+  }
+}
+
+function renderOverviewSignals() {
+  const total = DB.issues.length;
+  const open = DB.issues.filter(isOpenIssue);
+  const highOpen = open.filter(i => /high/i.test(i.prioritas)).length;
+  const waiting = DB.issues.filter(i => /waiting|menunggu|on hold/i.test(i.progress||'')).length;
+  const resolved = DB.issues.filter(isResolved).length;
+  const dates = [...new Set(DB.activities.map(a=>a.tanggal))];
+  const avg = dates.length ? (DB.activities.length / dates.length).toFixed(1) : '—';
+  const lastDate = DB.activities.map(a=>a.tanggal).sort().reverse()[0] || '—';
+  const factCounts = {};
+  DB.activities.forEach(a => { factCounts[a.factory] = (factCounts[a.factory]||0)+1; });
+  const topFactory = Object.entries(factCounts).sort((a,b)=>b[1]-a[1])[0]?.[0] || '—';
+
+  const s = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+  s('sig-high', highOpen);
+  s('sig-wait', waiting);
+  s('sig-res', resolved);
+  s('sig-total', total);
+  s('sig-avg', avg);
+  s('sig-last', fmtDate(lastDate) || '—');
+  s('sig-top-factory', topFactory);
+}
+
+function renderDeptMatrix() {
+  const c = {};
+  DB.activities.forEach(a => {
+    if (!c[a.dept]) c[a.dept] = { JJ: 0, JJ2: 0 };
+    c[a.dept][a.factory] = (c[a.dept][a.factory]||0)+1;
+  });
+  const sorted = Object.entries(c)
+    .map(([d, v]) => ({ d, jj: v.JJ||0, jj2: v.JJ2||0, total: (v.JJ||0)+(v.JJ2||0) }))
+    .sort((a,b) => b.total - a.total).slice(0, 8);
+  const maxTotal = sorted[0]?.total || 1;
+
+  document.getElementById('dept-matrix').innerHTML = sorted.map(row => {
+    const wJJ  = row.jj  ? Math.max(Math.round(row.jj  / maxTotal * 100), 4) : 0;
+    const wJJ2 = row.jj2 ? Math.max(Math.round(row.jj2 / maxTotal * 100), 4) : 0;
+    return `
+      <div class="dept-matrix-row">
+        <div class="dept-matrix-name" title="${row.d}">${row.d}</div>
+        <div class="dept-matrix-bars">
+          ${row.jj  ? `<div class="dept-bar-seg" style="flex:${wJJ};background:#5431E4" title="JJ: ${row.jj}">${row.jj}</div>` : ''}
+          ${row.jj2 ? `<div class="dept-bar-seg" style="flex:${wJJ2};background:#059669" title="JJ2: ${row.jj2}">${row.jj2}</div>` : ''}
+          ${(!row.jj && !row.jj2) ? `<div style="flex:1;height:16px;background:var(--border-light);border-radius:4px"></div>` : ''}
+        </div>
+        <div class="dept-matrix-total">${row.total}</div>
+      </div>`;
+  }).join('');
+  // Legend
+  document.getElementById('dept-matrix').insertAdjacentHTML('beforeend', `
+    <div style="display:flex;gap:14px;margin-top:12px;padding-top:10px;border-top:1px solid var(--border-light)">
+      <div style="display:flex;align-items:center;gap:5px">
+        <div style="width:12px;height:12px;border-radius:3px;background:#5431E4"></div>
+        <span style="font-size:11px;color:var(--txt-muted);font-weight:600">JJ</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:5px">
+        <div style="width:12px;height:12px;border-radius:3px;background:#059669"></div>
+        <span style="font-size:11px;color:var(--txt-muted);font-weight:600">JJ2</span>
+      </div>
+    </div>`);
+}
+
+function renderIssueScorecard() {
+  const total = DB.issues.length;
+  const open = DB.issues.filter(isOpenIssue).length;
+  const resolved = total - open;
+  const high = DB.issues.filter(i => /high/i.test(i.prioritas)).length;
+  const medium = DB.issues.filter(i => /medium/i.test(i.prioritas)).length;
+  const low = DB.issues.filter(i => /low/i.test(i.prioritas)).length;
+
+  document.getElementById('issue-scorecard').innerHTML = [
+    { label: 'Total Issue',  num: total,    color: 'var(--mon-blue)' },
+    { label: 'Open',         num: open,     color: 'var(--c-bad)' },
+    { label: 'Resolved',     num: resolved, color: '#059669' },
+    { label: 'High Priority',num: high,     color: '#E31A1A' },
+    { label: 'Medium',       num: medium,   color: '#D97706' },
+    { label: 'Low',          num: low,      color: '#059669' },
+  ].map(s => `
+    <div class="scorecard">
+      <div class="scorecard-label">${s.label}</div>
+      <div class="scorecard-num" style="color:${s.color}">${s.num}</div>
+    </div>`).join('');
+}
+
+function renderResolutionNew() {
+  const total = DB.issues.length;
+  const resolved = DB.issues.filter(isResolved).length;
+  const open = total - resolved;
+  const rate = total ? Math.round(resolved/total*100) : 0;
+  const color = rate >= 70 ? '#059669' : rate >= 40 ? '#D97706' : '#E31A1A';
+
+  const pct = document.getElementById('ov-res-pct');
+  if (pct) { pct.textContent = rate + '%'; pct.style.color = color; }
+  const fill = document.getElementById('ov-res-fill');
+  if (fill) { fill.style.width = rate + '%'; fill.style.background = color; }
+  const done = document.getElementById('ov-res-done');
+  if (done) done.textContent = `✓ ${resolved} selesai`;
+  const openEl = document.getElementById('ov-res-open');
+  if (openEl) openEl.textContent = `${open} masih open`;
+
+  // Priority mini breakdown
+  const prios = [
+    { key: 'High',   color: '#E31A1A' },
+    { key: 'Medium', color: '#D97706' },
+    { key: 'Low',    color: '#059669' },
+  ];
+  const counts = {};
+  DB.issues.forEach(i => { counts[i.prioritas] = (counts[i.prioritas]||0)+1; });
+  const maxP = Math.max(...prios.map(p=>counts[p.key]||0), 1);
+  const mini = document.getElementById('ov-priority-mini');
+  if (mini) mini.innerHTML = prios.map(p => {
+    const n = counts[p.key]||0;
+    const w = Math.round(n/maxP*100);
+    return `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">
+        <div style="font-size:10px;font-weight:700;color:${p.color};width:50px">${p.key}</div>
+        <div style="flex:1;height:8px;background:var(--border-light);border-radius:4px;overflow:hidden">
+          <div style="height:100%;background:${p.color};width:${w}%;border-radius:4px;transition:width .5s ease"></div>
+        </div>
+        <div style="font-size:12px;font-weight:800;color:${p.color};width:16px;text-align:right">${n}</div>
+      </div>`;
+  }).join('');
+}
+
+function renderFactoryGauges() {
+  const factories = ['JJ', 'JJ2'];
+  const colors = { JJ: '#5431E4', JJ2: '#059669' };
+  const el = document.getElementById('factory-gauges');
+  if (!el) return;
+  el.innerHTML = factories.map(f => {
+    const acts = DB.activities.filter(a => a.factory === f);
+    const done = acts.filter(a => /completed/i.test(a.status)).length;
+    const rate = acts.length ? Math.round(done/acts.length*100) : 0;
+    const color = colors[f];
+    return `
+      <div class="gauge-row">
+        <div class="gauge-factory">
+          <span class="factory-pill ${f.toLowerCase()}" style="font-size:10px;padding:2px 7px">${f}</span>
+        </div>
+        <div class="gauge-track">
+          <div class="gauge-fill" style="width:${rate}%;background:linear-gradient(to right,${color},${color}bb)">
+            ${rate > 15 ? rate + '%' : ''}
+          </div>
+        </div>
+        <div class="gauge-side">${done}/${acts.length} selesai</div>
+      </div>`;
+  }).join('');
+}
+
+function renderDateBarsNew() {
+  const c = {};
+  DB.activities.forEach(a => { c[a.tanggal]=(c[a.tanggal]||0)+1; });
+  const sorted = Object.entries(c).sort((a,b)=>a[0].localeCompare(b[0])).slice(-10);
+  const max = Math.max(...sorted.map(x=>x[1]),1);
+  const el = document.getElementById('date-bars-new');
+  if (!el) return;
+  el.innerHTML = sorted.map(([d,n]) => `
+    <div class="hbar-row">
+      <div class="hbar-label">${fmtDate(d)}</div>
+      <div class="hbar-track"><div class="hbar-fill" style="width:${Math.round(n/max*100)}%;background:linear-gradient(to right,#5431E4,#856AEA)"></div></div>
+      <div class="hbar-count">${n}</div>
+    </div>`).join('');
+}
+
+function renderOvIssueHeat() {
+  const openIss = DB.issues.filter(isOpenIssue).slice().sort((a,b)=>b.tanggal.localeCompare(a.tanggal));
+  const label = document.getElementById('ov-iss-count-label');
+  if (label) label.textContent = `${openIss.length} issue open`;
+  const tbody = document.getElementById('ov-issue-heat-body');
+  if (!tbody) return;
+  if (!openIss.length) {
+    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--txt-muted);font-size:12px">Tidak ada issue open</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = openIss.map(iss => {
+    const prColor = /high/i.test(iss.prioritas) ? '#E31A1A' : /medium/i.test(iss.prioritas) ? '#D97706' : '#059669';
+    const prBg   = /high/i.test(iss.prioritas) ? 'rgba(227,26,26,.1)' : /medium/i.test(iss.prioritas) ? 'rgba(255,203,69,.15)' : 'rgba(5,205,68,.1)';
+    return `
+      <tr>
+        <td>
+          <div style="font-size:12px;font-weight:600;color:var(--txt-primary)">${iss.item}</div>
+          <div style="font-size:10px;color:var(--txt-muted)">${iss.vendor} · <span class="factory-pill ${iss.factory.toLowerCase()}" style="font-size:9px;padding:1px 5px">${iss.factory}</span></div>
+        </td>
+        <td><span class="heat-pill" style="color:${prColor};background:${prBg}">${iss.prioritas}</span></td>
+        <td style="font-size:11px;color:var(--txt-secondary);max-width:120px;word-break:break-word">${iss.progress||'—'}</td>
+      </tr>`;
+  }).join('');
+}
+
+function renderOvFeed() {
+  // Group activities by date, show 5 most recent dates
+  const byDate = {};
+  DB.activities.forEach(a => {
+    if (!byDate[a.tanggal]) byDate[a.tanggal] = [];
+    byDate[a.tanggal].push(a);
+  });
+  const dates = Object.keys(byDate).sort().reverse().slice(0, 5);
+  const el = document.getElementById('ov-feed');
+  if (!el) return;
+
+  el.innerHTML = dates.map(date => {
+    const acts = byDate[date];
+    const depts = [...new Set(acts.map(a=>a.dept))];
+    const factories = [...new Set(acts.map(a=>a.factory))];
+    const dateLabel = fmtDate(date);
+    const deptsText = depts.slice(0,3).join(', ') + (depts.length > 3 ? ` +${depts.length-3}` : '');
+    return `
+      <div class="feed-item">
+        <div class="feed-date-col">
+          <div class="feed-date-day">${dateLabel}</div>
+          <div class="feed-date-mon"></div>
+        </div>
+        <div class="feed-line"></div>
+        <div class="feed-body">
+          <div class="feed-title">${factories.map(f=>`<span class="factory-pill ${f.toLowerCase()}" style="font-size:9px;padding:1px 6px">${f}</span>`).join(' ')} <span style="font-size:12px;font-weight:700;margin-left:4px">${acts.length} aktivitas</span></div>
+          <div class="feed-sub">Dept: ${deptsText}</div>
+        </div>
+        <div class="feed-count">${acts.length}</div>
+      </div>`;
+  }).join('');
+}
+
+function renderDeptRank() {
+  const c = {};
+  DB.activities.forEach(a => {
+    if (!c[a.dept]) c[a.dept] = { total: 0, done: 0 };
+    c[a.dept].total++;
+    if (/completed/i.test(a.status)) c[a.dept].done++;
+  });
+  const sorted = Object.entries(c)
+    .map(([d, v]) => ({ d, ...v, rate: Math.round(v.done/v.total*100) }))
+    .sort((a,b)=>b.total-a.total).slice(0, 7);
+  const maxT = sorted[0]?.total||1;
+
+  const el = document.getElementById('ov-dept-rank');
+  if (!el) return;
+  el.innerHTML = sorted.map((row, idx) => {
+    const rateColor = row.rate >= 70 ? '#059669' : row.rate >= 40 ? '#D97706' : '#E31A1A';
+    return `
+      <div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border-light)">
+        <div style="width:18px;font-size:11px;font-weight:900;color:var(--txt-muted);text-align:center">${idx+1}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:12px;font-weight:700;color:var(--txt-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${row.d}</div>
+          <div style="height:4px;background:var(--border-light);border-radius:4px;margin-top:4px;overflow:hidden">
+            <div style="height:100%;background:var(--shc-primary);width:${Math.round(row.total/maxT*100)}%;border-radius:4px"></div>
+          </div>
+        </div>
+        <div style="text-align:right;flex-shrink:0">
+          <div style="font-size:13px;font-weight:800;color:var(--txt-primary)">${row.total}</div>
+          <div style="font-size:10px;font-weight:700;color:${rateColor}">${row.rate}%</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderSummary() {
+  const factories = ['JJ','JJ2'];
+  let rows = factories.map(f => {
+    const acts = DB.activities.filter(a => a.factory === f);
+    const done = acts.filter(a => /completed/i.test(a.status)).length;
+    const rate = acts.length ? Math.round(done/acts.length*100) : 0;
+    return { f, total: acts.length, done, prog: acts.length - done, rate };
+  });
+  const totals = {
+    total: rows.reduce((s,r)=>s+r.total,0),
+    done: rows.reduce((s,r)=>s+r.done,0),
+    prog: rows.reduce((s,r)=>s+r.prog,0),
+  };
+  const totalRate = totals.total ? Math.round(totals.done/totals.total*100) : 0;
+
+  const rateClass = r => r >= 70 ? 'pct-green' : r >= 40 ? 'pct-amber' : 'pct-red';
+
+  document.getElementById('summary-tbody').innerHTML = [
+    ...rows.map(r => `
+      <tr>
+        <td><span class="factory-pill ${r.f.toLowerCase()}">${r.f}</span></td>
+        <td style="font-weight:700">${r.total}</td>
+        <td>${r.done}</td>
+        <td>${r.prog}</td>
+        <td class="${rateClass(r.rate)}">${r.rate}%</td>
+      </tr>`),
+    `<tr style="background:var(--bg-page)">
+      <td style="font-weight:800">Total</td>
+      <td style="font-weight:800">${totals.total}</td>
+      <td style="font-weight:700">${totals.done}</td>
+      <td style="font-weight:700">${totals.prog}</td>
+      <td class="${rateClass(totalRate)}" style="font-weight:800">${totalRate}%</td>
+    </tr>`
+  ].join('');
+}
+
+function renderDeptBars() {
+  const c = {};
+  DB.activities.forEach(a => { c[a.dept] = (c[a.dept]||0)+1; });
+  const sorted = Object.entries(c).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const max = sorted[0]?.[1]||1;
+  document.getElementById('dept-bars').innerHTML = sorted.map(([d,n]) => `
+    <div class="hbar-row">
+      <div class="hbar-label" title="${d}">${d}</div>
+      <div class="hbar-track"><div class="hbar-fill" style="width:${Math.round(n/max*100)}%;background:linear-gradient(to right,#5431E4,#856AEA)"></div></div>
+      <div class="hbar-count">${n}</div>
+    </div>`).join('');
+}
+
+function renderDateBars() {
+  const c = {};
+  DB.activities.forEach(a => { c[a.tanggal]=(c[a.tanggal]||0)+1; });
+  const sorted = Object.entries(c).sort((a,b)=>a[0].localeCompare(b[0])).slice(-10);
+  const max = Math.max(...sorted.map(x=>x[1]),1);
+  document.getElementById('date-bars').innerHTML = sorted.map(([d,n]) => `
+    <div class="hbar-row">
+      <div class="hbar-label">${fmtDate(d)}</div>
+      <div class="hbar-track"><div class="hbar-fill" style="width:${Math.round(n/max*100)}%;background:linear-gradient(to right,#C0FF45,#a8e832)"></div></div>
+      <div class="hbar-count">${n}</div>
+    </div>`).join('');
+}
+
+// Keep legacy chart functions (canvases hidden, kept for compat)
+function mkChart(id, labels, data, colors) {
+  if (charts[id]) charts[id].destroy();
+  const ctx = document.getElementById(id);
+  if (!ctx) return;
+  charts[id] = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }] },
+    options: { responsive: true, maintainAspectRatio: false, cutout: '60%', plugins: { legend: { display: false } } }
+  });
+}
+function renderChartPrior() {
+  const c = { High:0, Medium:0, Low:0 };
+  DB.issues.forEach(i => { if(c[i.prioritas]!==undefined) c[i.prioritas]++; });
+  mkChart('chart-prior', ['High','Medium','Low'], Object.values(c), ['#E31A1A','#FFCB45','#05CD44']);
+}
+function renderChartStatus() {
+  const c = {};
+  DB.issues.forEach(i => { const s = i.progress||'Unknown'; c[s]=(c[s]||0)+1; });
+  const e = Object.entries(c).slice(0,5);
+  mkChart('chart-status', e.map(x=>x[0]), e.map(x=>x[1]), ['#5431E4','#C0FF45','#856AEA','#B3A3F1','#1B2559']);
+}
+
+// ── NEW OVERVIEW RENDERS ──
+
+function isResolved(issue) {
+  return /completed|closed|delivery completed/i.test(issue.progress||'') || !!issue.selesai;
+}
+function isOpenIssue(issue) { return !isResolved(issue); }
+
+function renderIssueHealth() {
+  const total = DB.issues.length;
+  const open = DB.issues.filter(isOpenIssue).length;
+  const resolved = total - open;
+  const high = DB.issues.filter(i => /high/i.test(i.prioritas) && isOpenIssue(i)).length;
+  const waiting = DB.issues.filter(i => /waiting/i.test(i.progress||'')).length;
+
+  const metrics = [
+    { label: t('ov_open_label'),         val: open,     color: '#E31A1A', max: Math.max(total,1) },
+    { label: t('ov_high_issues'),         val: high,     color: '#FFCB45', max: Math.max(total,1) },
+    { label: t('ov_resolved_label'),      val: resolved, color: '#05CD44', max: Math.max(total,1) },
+    { label: t('ov_in_progress_label'),   val: waiting,  color: '#5431E4', max: Math.max(total,1) },
+  ];
+
+  document.getElementById('issue-health-bars').innerHTML = metrics.map(m => `
+    <div class="health-metric">
+      <div class="health-metric-left">
+        <div class="health-dot" style="background:${m.color}"></div>
+        <div class="health-label">${m.label}</div>
+      </div>
+      <div class="health-bar-wrap">
+        <div class="health-bar-fill" style="width:${Math.round(m.val/m.max*100)}%;background:${m.color};opacity:.75"></div>
+      </div>
+      <div class="health-val" style="color:${m.color}">${m.val}</div>
+    </div>`).join('');
+
+  // Stacked bar
+  const inProg = DB.issues.filter(i => isOpenIssue(i) && !/waiting/i.test(i.progress||'')).length;
+  const stackTotal = Math.max(total, 1);
+  const segs = [
+    { val: resolved, color: '#05CD44', label: t('ov_resolved_label') },
+    { val: waiting,  color: '#5431E4', label: t('ov_in_progress_label') },
+    { val: inProg,   color: '#FFCB45', label: t('ov_open_label') },
+  ];
+  document.getElementById('issue-stacked-bar').innerHTML = segs.map(s =>
+    `<div class="stacked-seg" style="flex:${s.val};background:${s.color};min-width:${s.val?'8px':'0'}"></div>`
+  ).join('');
+  document.getElementById('issue-stacked-legend').innerHTML = segs.map(s =>
+    s.val ? `<div style="display:flex;align-items:center;gap:4px">
+      <div style="width:8px;height:8px;border-radius:2px;background:${s.color}"></div>
+      <span style="font-size:10px;color:var(--txt-muted)">${s.label} (${s.val})</span>
+    </div>` : ''
+  ).join('');
+}
+
+function renderFactoryPerf() {
+  const factories = ['JJ', 'JJ2'];
+  const colors = { JJ: '#5431E4', JJ2: '#059669' };
+  document.getElementById('factory-perf-grid').innerHTML = factories.map(f => {
+    const acts = DB.activities.filter(a => a.factory === f);
+    const done = acts.filter(a => /completed/i.test(a.status)).length;
+    const rate = acts.length ? Math.round(done / acts.length * 100) : 0;
+    const color = colors[f] || '#5431E4';
+    return `
+      <div class="factory-perf-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <span class="factory-pill ${f.toLowerCase()}" style="font-size:12px">${f}</span>
+          <span style="font-size:10px;color:var(--txt-muted)">${acts.length} ${t('label_acts_count')}</span>
+        </div>
+        <div style="font-size:28px;font-weight:800;color:${color};line-height:1">${rate}%</div>
+        <div style="font-size:10px;color:var(--txt-muted);margin-bottom:8px">${t('tbl_completion_rate')}</div>
+        <div class="factory-perf-bar-wrap">
+          <div class="factory-perf-bar" style="width:${rate}%;background:linear-gradient(to right,${color},${color}99)"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:10px;color:var(--txt-muted)">
+          <span>✓ ${done}</span><span>⏳ ${acts.length - done}</span>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function renderQuickInsights() {
+  const totalActs = DB.activities.length;
+  const totalIss = DB.issues.length;
+  const resolved = DB.issues.filter(isResolved).length;
+  const highOpen = DB.issues.filter(i => /high/i.test(i.prioritas) && isOpenIssue(i)).length;
+  const overallRate = totalActs ? Math.round(DB.activities.filter(a=>/completed/i.test(a.status)).length/totalActs*100) : 0;
+  const activeDays = [...new Set(DB.activities.map(a=>a.tanggal))].length;
+
+  const insights = [
+    { icon: '📈', color: '#5431E4', bg: 'rgba(84,49,228,.1)', val: overallRate + '%', label: t('ov_completion_rate') },
+    { icon: '🔴', color: '#E31A1A', bg: 'rgba(227,26,26,.1)', val: highOpen,            label: t('ov_high_issues') },
+    { icon: '✅', color: '#059669', bg: 'rgba(5,205,68,.1)',  val: resolved,            label: t('ov_resolved_issues') },
+    { icon: '📅', color: '#1B2559', bg: 'rgba(27,37,89,.1)', val: activeDays,           label: t('ov_active_days') },
+  ];
+
+  document.getElementById('quick-insights').innerHTML = insights.map(ins => `
+    <div class="insight-block">
+      <div class="insight-block-icon" style="background:${ins.bg}">
+        <span style="font-size:18px">${ins.icon}</span>
+      </div>
+      <div>
+        <div class="insight-block-num" style="color:${ins.color}">${ins.val}</div>
+        <div class="insight-block-label">${ins.label}</div>
+      </div>
+    </div>`).join('');
+}
+
+function renderPriorityBreakdown() {
+  const prios = [
+    { key: 'High',   color: '#E31A1A', label: currentLang==='ko'?'높음':currentLang==='en'?'High':'High' },
+    { key: 'Medium', color: '#FFCB45', label: currentLang==='ko'?'중간':currentLang==='en'?'Medium':'Medium' },
+    { key: 'Low',    color: '#05CD44', label: currentLang==='ko'?'낮음':currentLang==='en'?'Low':'Low' },
+  ];
+  const counts = {};
+  DB.issues.forEach(i => { counts[i.prioritas] = (counts[i.prioritas]||0)+1; });
+  const maxVal = Math.max(...prios.map(p => counts[p.key]||0), 1);
+
+  document.getElementById('priority-breakdown').innerHTML = prios.map(p => {
+    const n = counts[p.key] || 0;
+    const w = Math.round(n / maxVal * 100);
+    return `
+      <div class="priority-bar-row">
+        <div class="priority-bar-label" style="color:${p.color}">${p.label}</div>
+        <div class="priority-bar-track">
+          <div class="priority-bar-fill" style="width:${Math.max(w,n?8:0)}%;background:${p.color}">
+            ${n ? '' : ''}
+          </div>
+        </div>
+        <div class="priority-bar-count" style="color:${p.color}">${n}</div>
+      </div>`;
+  }).join('');
+}
+
+function renderResolutionRing() {
+  const total = DB.issues.length;
+  const resolved = DB.issues.filter(isResolved).length;
+  const rate = total ? Math.round(resolved / total * 100) : 0;
+
+  document.getElementById('resolution-pct').textContent = rate + '%';
+  document.getElementById('resolution-desc').innerHTML =
+    `<strong style="color:var(--txt-primary)">${resolved}</strong> ${t('ov_resolved_label').toLowerCase()} / <strong>${total}</strong> ${t('label_total_issues')}`;
+
+  if (charts['resolution-ring']) charts['resolution-ring'].destroy();
+  const ctx = document.getElementById('chart-resolution-ring');
+  if (!ctx) return;
+  const color = rate >= 70 ? '#05CD44' : rate >= 40 ? '#FFCB45' : '#E31A1A';
+  charts['resolution-ring'] = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      datasets: [{
+        data: [resolved, Math.max(total - resolved, 0)],
+        backgroundColor: [color, '#E2E8F0'],
+        borderWidth: 0,
+      }]
+    },
+    options: {
+      responsive: false, cutout: '72%',
+      plugins: { legend: { display: false }, tooltip: { enabled: false } },
+      animation: { duration: 600 }
+    }
+  });
+}
+
+function renderRecentIssues() {
+  const list = document.getElementById('recent-issues-list');
+  const items = DB.issues.slice().sort((a,b) => b.tanggal.localeCompare(a.tanggal)).slice(0, 4);
+  if (!items.length) { list.innerHTML = `<div style="text-align:center;padding:24px;color:var(--txt-muted);font-size:12px">${t('ov_no_issues')}</div>`; return; }
+  list.innerHTML = items.map(iss => {
+    const open = isOpenIssue(iss);
+    const prColor = /high/i.test(iss.prioritas) ? '#E31A1A' : /medium/i.test(iss.prioritas) ? '#D97706' : '#059669';
+    return `
+      <div class="recent-item">
+        <div class="recent-item-icon" style="background:${open?'rgba(227,26,26,.08)':'rgba(5,205,68,.08)'}">
+          <span style="font-size:15px">${open?'⚠️':'✅'}</span>
+        </div>
+        <div class="recent-item-body">
+          <div class="recent-item-title">${iss.item} · <span style="color:var(--txt-muted)">${iss.vendor}</span></div>
+          <div class="recent-item-sub">${iss.factory} · ${iss.tanggal.slice(5)} · <span style="color:${prColor};font-weight:700">${iss.prioritas}</span></div>
+        </div>
+        <div class="recent-item-right">${sb(iss.progress)}</div>
+      </div>`;
+  }).join('');
+}
+
+function renderRecentActivity() {
+  const list = document.getElementById('recent-activity-list');
+  const items = DB.activities.slice().sort((a,b) => b.tanggal.localeCompare(a.tanggal)).slice(0, 3);
+  if (!items.length) { list.innerHTML = `<div style="text-align:center;padding:12px;color:var(--txt-muted);font-size:12px">${t('ov_no_activity')}</div>`; return; }
+  list.innerHTML = items.map(act => `
+    <div class="recent-item">
+      <div class="recent-item-icon" style="background:rgba(84,49,228,.08)">
+        <span style="font-size:14px">📋</span>
+      </div>
+      <div class="recent-item-body">
+        <div class="recent-item-title">${act.dept} · <span style="color:var(--txt-muted);font-weight:400">${act.pic.split('/')[0].trim()}</span></div>
+        <div class="recent-item-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:200px">${act.desc}</div>
+      </div>
+      <div class="recent-item-right">${sb(act.status)}</div>
+    </div>`).join('');
+}
+
+function populateDeptFilter() {
+  const depts = [...new Set(DB.activities.map(a=>a.dept))].sort();
+  const sel = document.getElementById('act-dept-f');
+  const cur = sel.value;
+  sel.innerHTML = `<option value="">${t('all_dept')}</option>` +
+    depts.map(d=>`<option${d===cur?' selected':''}>${d}</option>`).join('');
+}
+
+// Badges
+// Translate ONLY controlled status values (exact match). Free-text progress notes
+// like "Waiting Purchasing" are left as-is so no information is lost.
+function statusLabel(s) {
+  const x = String(s||'').trim().toLowerCase();
+  const map = {
+    'completed':'st_completed', 'selesai':'st_completed', '완료':'st_completed',
+    'in progress':'st_in_progress', 'berlangsung':'st_in_progress', 'progress':'st_in_progress', '진행 중':'st_in_progress', '진행중':'st_in_progress',
+    'on hold':'st_on_hold', 'ditunda':'st_on_hold', 'hold':'st_on_hold', '보류':'st_on_hold',
+    'waiting':'st_waiting', 'menunggu':'st_waiting', '대기':'st_waiting'
+  };
+  return map[x] ? t(map[x]) : s;
+}
+function sb(s) {
+  if (!s) return '<span class="badge b-hold">—</span>';
+  s = String(s);
+  const label = statusLabel(s);
+  if (/^completed$/i.test(s)||s.toLowerCase().includes('selesai')||s.toLowerCase().includes('delivery completed'))
+    return `<span class="badge b-done">${label}</span>`;
+  if (/progress/i.test(s)) return `<span class="badge b-progress">${label}</span>`;
+  if (/waiting|menunggu/i.test(s)) return `<span class="badge b-waiting">${label}</span>`;
+  return `<span class="badge b-hold">${label}</span>`;
+}
+function pb(p) {
+  if (!p) return '<span class="badge b-hold">—</span>';
+  if (/high/i.test(p))   return `<span class="badge b-high">${p}</span>`;
+  if (/medium/i.test(p)) return `<span class="badge b-medium">${p}</span>`;
+  if (/low/i.test(p))    return `<span class="badge b-low">${p}</span>`;
+  return `<span class="badge b-hold">${p}</span>`;
+}
+function initials(name) {
+  return (name||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+}
+const avatarColors = [
+  'background:rgba(84,49,228,.12);color:#5431E4',
+  'background:rgba(5,205,68,.15);color:#059669',
+  'background:rgba(227,26,26,.1);color:#E31A1A',
+  'background:rgba(133,106,234,.15);color:#563ADB',
+  'background:rgba(27,37,89,.12);color:#1B2559'
+];
+function avatarColor(name) {
+  return avatarColors[(name||'').charCodeAt(0) % avatarColors.length];
+}
+
+// Activity Table
+function renderActTable() {
+  const q = (document.getElementById('act-q')?.value||'').toLowerCase();
+  const f = document.getElementById('act-factory')?.value||'';
+  const d = document.getElementById('act-dept-f')?.value||'';
+  const rows = DB.activities.filter(a =>
+    (!q || [a.dept,a.desc,a.pic,a.ket].some(x=>(x||'').toLowerCase().includes(q))) &&
+    (!f || a.factory===f) && (!d || a.dept===d)
+  ).sort((a,b)=>b.tanggal.localeCompare(a.tanggal));
+
+  const tbody = document.getElementById('act-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="8" class="empty-row">${t('empty_act')}${isPIC?t('empty_pic_suffix_act'):''}</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(a => `
+    <tr>
+      <td style="white-space:nowrap;font-size:11px;color:var(--txt-muted)">${a.tanggal}</td>
+      <td><span class="factory-pill ${a.factory.toLowerCase()}">${a.factory}</span></td>
+      <td style="font-size:11px">${a.pic}</td>
+      <td><span style="font-size:11px;font-weight:600">${a.dept}</span></td>
+      <td class="td-trunc" title="${a.desc.replace(/"/g,'&quot;')}">${a.desc}</td>
+      <td class="td-trunc" style="max-width:140px;color:var(--txt-muted);font-size:11px" title="${(a.remark||'').replace(/"/g,'&quot;')}">${a.remark||'—'}</td>
+      <td>${sb(a.status)}</td>
+      <td>${isPIC ? `<button class="btn-upd btn-edit" onclick="openEditActivity('${a.id}')">${t('btn_edit')}</button>` : ''}</td>
+    </tr>`).join('');
+}
+
+// Issue Table
+function renderIssTable() {
+  const q = (document.getElementById('iss-q')?.value||'').toLowerCase();
+  const f = document.getElementById('iss-factory')?.value||'';
+  const p = document.getElementById('iss-prior-f')?.value||'';
+  const rows = DB.issues.filter(i =>
+    (!q || [i.item,i.vendor,i.issue,i.pic,i.dept].some(x=>(x||'').toLowerCase().includes(q))) &&
+    (!f || i.factory===f) && (!p || i.prioritas===p)
+  ).sort((a,b)=>b.tanggal.localeCompare(a.tanggal));
+
+  const tbody = document.getElementById('iss-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="16" class="empty-row">${t('empty_iss')}${isPIC?t('empty_pic_suffix_iss'):''}</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(iss => `
+    <tr>
+      <td class="fcol-1" style="font-size:11px;color:var(--txt-muted)">${iss.tanggal}</td>
+      <td class="fcol-2" style="font-size:11px;font-weight:600">${iss.pic}</td>
+      <td class="fcol-3"><span class="factory-pill ${iss.factory.toLowerCase()}">${iss.factory}</span></td>
+      <td style="font-size:11px">${iss.dept||'—'}</td>
+      <td style="font-size:11px">${iss.shiPic||'—'}</td>
+      <td style="font-size:11px">${iss.user||'—'}</td>
+      <td style="font-size:12px;font-weight:600">${iss.item}</td>
+      <td style="font-size:11px">${iss.vendor}</td>
+      <td class="wrap-cell" style="font-size:11px">${iss.beginIssue||'—'}</td>
+      <td class="wrap-cell td-trunc" title="${(iss.issue||'').replace(/"/g,'&quot;')}" style="max-width:200px;font-size:11px">${iss.issue}</td>
+      <td>${pb(iss.prioritas)}</td>
+      <td style="font-size:11px">${sb(iss.progress)}</td>
+      <td style="font-size:11px">${iss.target||'—'}</td>
+      <td style="font-size:11px">${iss.selesai||'—'}</td>
+      <td class="wrap-cell" style="font-size:11px;color:var(--txt-muted)">${iss.ket||'—'}</td>
+      <td>${isPIC ? `<div class="row-actions"><button class="btn-upd btn-edit" onclick="openEditIssue('${iss.id}')">${t('btn_edit')}</button><button class="btn-upd" onclick="openUpdate('${iss.id}')">${t('btn_update')}</button></div>` : ''}</td>
+    </tr>`).join('');
+}
+
+
+// ═══════════════════════════════════════
+// SAVE DATA
+// ═══════════════════════════════════════
+let editingActId = null;
+let editingIssId = null;
+
+function saveActivity() {
+  const v = {
+    tanggal: g('fa-tanggal'), factory: g('fa-factory'), pic: g('fa-pic').trim(),
+    dept: g('fa-dept').trim(), desc: g('fa-desc').trim(),
+    remark: g('fa-remark').trim(), status: g('fa-status'), ket: g('fa-ket').trim()
+  };
+  if (!v.tanggal||!v.factory||!v.pic||!v.dept||!v.desc) return toast(t('toast_err_fill'));
+  const isEdit = !!editingActId;
+  const editId = editingActId;
+  editingActId = null;
+
+  if (fbLive) {
+    if (isEdit) {
+      sheetsSend({ sheet:'activities', action:'update', id: editId, data: v });
+    } else {
+      sheetsSend({ sheet:'activities', action:'add', data: v });
+    }
+  } else {
+    if (isEdit) {
+      const idx = DB.activities.findIndex(a => a.id === editId);
+      if (idx > -1) DB.activities[idx] = { ...DB.activities[idx], ...v };
+    } else {
+      DB.activities.push({ id: 'local'+DB.nextId.act++, ...v });
+    }
+    renderAll();
+  }
+  closeModal('modal-activity');
+  clearForm(['fa-pic','fa-dept','fa-desc','fa-remark','fa-ket']);
+  showPage('aktivitas', document.querySelectorAll('.nav-item')[1]);
+  toast(t('toast_act_saved'));
+}
+
+function openEditActivity(id) {
+  const a = DB.activities.find(x => x.id === id);
+  if (!a) return;
+  editingActId = id;
+  document.getElementById('fa-tanggal').value = (d => { if(!d) return ''; const p=d.split('-'); return p.length===3&&p[0].length===2?`${p[2]}-${p[1]}-${p[0]}`:d; })(a.tanggal);
+  document.getElementById('fa-factory').value = a.factory;
+  document.getElementById('fa-pic').value     = a.pic;
+  document.getElementById('fa-dept').value    = a.dept;
+  document.getElementById('fa-desc').value    = a.desc;
+  document.getElementById('fa-remark').value  = a.remark||'';
+  document.getElementById('fa-status').value  = a.status||'In Progress';
+  document.getElementById('fa-ket').value     = a.ket||'';
+  document.getElementById('modal-activity-title').textContent = t('modal_edit_activity');
+  document.getElementById('modal-activity-savebtn').textContent = t('btn_save_changes');
+  document.getElementById('modal-activity-delbtn').style.display = 'inline-block';
+  openModal('modal-activity', true);
+}
+
+function deleteActivity() {
+  if (!editingActId) return;
+  if (!confirm(t('confirm_delete_act'))) return;
+  const id = editingActId;
+  editingActId = null;
+  if (fbLive) {
+    sheetsSend({ sheet:'activities', action:'delete', id: id });
+  } else {
+    DB.activities = DB.activities.filter(a => a.id !== id);
+    renderAll();
+  }
+  closeModal('modal-activity');
+  toast(t('toast_act_saved'));
+}
+
+function saveIssue() {
+  const v = {
+    tanggal: g('fi-tanggal'), factory: g('fi-factory'), pic: g('fi-pic').trim(),
+    dept: g('fi-dept').trim(), shiPic: g('fi-shipic').trim(), user: g('fi-user').trim(),
+    item: g('fi-item').trim(), vendor: g('fi-vendor').trim(), beginIssue: g('fi-begin').trim(),
+    issue: g('fi-issue').trim(), prioritas: g('fi-prior'),
+    progress: g('fi-progress').trim(), target: g('fi-target').trim(), ket: g('fi-ket').trim()
+  };
+  if (!v.tanggal||!v.factory||!v.pic||!v.item||!v.vendor||!v.issue) return toast(t('toast_err_fill'));
+  const isEdit = !!editingIssId;
+  const editId = editingIssId;
+  editingIssId = null;
+
+  if (fbLive) {
+    if (isEdit) {
+      sheetsSend({ sheet:'issues', action:'update', id: editId, data: v });
+    } else {
+      sheetsSend({ sheet:'issues', action:'add', data: { ...v, selesai: '' } });
+    }
+  } else {
+    if (isEdit) {
+      const idx = DB.issues.findIndex(i => i.id === editId);
+      if (idx > -1) DB.issues[idx] = { ...DB.issues[idx], ...v };
+    } else {
+      DB.issues.push({ id: 'local'+DB.nextId.iss++, ...v, selesai: '' });
+    }
+    renderAll();
+  }
+  closeModal('modal-issue');
+  clearForm(['fi-pic','fi-dept','fi-shipic','fi-user','fi-item','fi-vendor','fi-begin','fi-issue','fi-progress','fi-target','fi-ket']);
+  showPage('issues', document.querySelectorAll('.nav-item')[2]);
+  toast(t('toast_iss_saved'));
+}
+
+function openEditIssue(id) {
+  const iss = DB.issues.find(i => i.id === id);
+  if (!iss) return;
+  editingIssId = id;
+  document.getElementById('fi-tanggal').value = iss.tanggal;
+  document.getElementById('fi-factory').value = iss.factory;
+  document.getElementById('fi-pic').value     = iss.pic;
+  document.getElementById('fi-dept').value    = iss.dept||'';
+  document.getElementById('fi-shipic').value  = iss.shiPic||'';
+  document.getElementById('fi-user').value    = iss.user||'';
+  document.getElementById('fi-item').value    = iss.item;
+  document.getElementById('fi-vendor').value  = iss.vendor;
+  document.getElementById('fi-begin').value   = iss.beginIssue||'';
+  document.getElementById('fi-issue').value   = iss.issue;
+  document.getElementById('fi-prior').value   = iss.prioritas||'Medium';
+  document.getElementById('fi-progress').value= iss.progress||'';
+  document.getElementById('fi-target').value  = iss.target||'';
+  document.getElementById('fi-ket').value     = iss.ket||'';
+  document.getElementById('modal-issue-title').textContent = t('modal_edit_issue');
+  document.getElementById('modal-issue-savebtn').textContent = t('btn_save_changes');
+  document.getElementById('modal-issue-delbtn').style.display = 'inline-block';
+  openModal('modal-issue', true);
+}
+
+function deleteIssue() {
+  if (!editingIssId) return;
+  if (!confirm(t('confirm_delete_iss'))) return;
+  const id = editingIssId;
+  editingIssId = null;
+  if (fbLive) {
+    sheetsSend({ sheet:'issues', action:'delete', id: id });
+  } else {
+    DB.issues = DB.issues.filter(i => i.id !== id);
+    renderAll();
+  }
+  closeModal('modal-issue');
+  toast(t('toast_iss_saved'));
+}
+
+
+let updatingId = null;
+function openUpdate(id) {
+  const iss = DB.issues.find(i => i.id === id);
+  if (!iss) return;
+  updatingId = id;
+  document.getElementById('upd-info').innerHTML = `
+    <strong>${iss.item}</strong> · ${iss.vendor}<br>
+    <span style="color:var(--shc-light)">${iss.issue}</span>`;
+  document.getElementById('fu-progress').value = iss.progress||'';
+  document.getElementById('fu-target').value   = iss.target||'';
+  document.getElementById('fu-selesai').value  = iss.selesai||'';
+  document.getElementById('fu-ket').value      = '';
+  openModal('modal-update');
+}
+function doUpdateIssue() {
+  const prog = document.getElementById('fu-progress').value.trim();
+  if (!prog) return toast(t('toast_err_progress'));
+  const id = updatingId;
+  const target  = document.getElementById('fu-target').value.trim();
+  const selesai = document.getElementById('fu-selesai').value;
+  const ket     = document.getElementById('fu-ket').value.trim();
+
+  if (fbLive) {
+    const patch = { progress: prog, target, selesai };
+    if (ket) patch.ket = ket;
+    sheetsSend({ sheet:'issues', action:'update', id: id, data: patch });
+  } else {
+    const iss = DB.issues.find(i => i.id === id);
+    if (iss) {
+      iss.progress = prog; iss.target = target; iss.selesai = selesai;
+      if (ket) iss.ket = ket;
+    }
+    renderAll();
+  }
+  closeModal('modal-update');
+  toast(t('toast_iss_updated'));
+}
+
+
+// ═══════════════════════════════════════
+// UI HELPERS
+// ═══════════════════════════════════════
+function g(id) { return (document.getElementById(id)?.value||''); }
+function clearForm(ids) {
+  ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+}
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+function openNewActivity() {
+  editingActId = null;
+  document.getElementById('modal-activity-title').textContent = t('modal_add_activity');
+  document.getElementById('modal-activity-savebtn').textContent = t('btn_save_activity');
+  document.getElementById('modal-activity-delbtn').style.display = 'none';
+  clearForm(['fa-pic','fa-dept','fa-desc','fa-remark','fa-ket']);
+  document.getElementById('fa-factory').value = '';
+  document.getElementById('fa-status').value = 'In Progress';
+  openModal('modal-activity');
+}
+function openNewIssue() {
+  editingIssId = null;
+  document.getElementById('modal-issue-title').textContent = t('modal_add_issue');
+  document.getElementById('modal-issue-savebtn').textContent = t('btn_save_issue');
+  document.getElementById('modal-issue-delbtn').style.display = 'none';
+  clearForm(['fi-pic','fi-dept','fi-shipic','fi-user','fi-item','fi-vendor','fi-begin','fi-issue','fi-progress','fi-target','fi-ket']);
+  document.getElementById('fi-factory').value = '';
+  document.getElementById('fi-prior').value = 'Medium';
+  openModal('modal-issue');
+}
+function openModal(id, skipDateDefault) {
+  document.getElementById(id).classList.add('open');
+  if (!skipDateDefault) {
+    const today = new Date().toISOString().slice(0,10);
+    const df = { 'modal-activity':'fa-tanggal', 'modal-issue':'fi-tanggal' };
+    const fid = df[id];
+    if (fid) document.getElementById(fid).value = today;
+  }
+}
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape')
+    document.querySelectorAll('.overlay.open').forEach(m => m.classList.remove('open'));
+});
+
+// Init
+applyTranslations();
+</script>
+</body>
+</html>
