@@ -6,6 +6,7 @@
 <title>SHC · SHI Delegate Dashboard — JJ & JJ2</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 /* ═══════════════════════════════════════
    SHI MONITORING THEME — Dark Navy + Lime
@@ -508,7 +509,8 @@ body {
 .table-toolbar input:focus, .table-toolbar select:focus {
   border-color: var(--shc-light); box-shadow: 0 0 0 3px rgba(84,49,228,.1);
 }
-.tbl-wrap { overflow-x: auto; }
+.tbl-wrap { overflow-x: auto; overflow-y: auto; max-height: 640px; border-radius: 12px; }
+.tbl-wrap thead th { position: sticky; top: 0; z-index: 15; }
 table { width: 100%; border-collapse: collapse; font-size: 12px; }
 thead th {
   padding: 10px 14px; text-align: left; font-size: 10px; font-weight: 700;
@@ -971,6 +973,10 @@ tbody tr:hover td { background: rgba(240,242,245,.6); }
         </div>
       </div>
       <div class="topbar-right">
+        <!-- Export backup -->
+        <button onclick="exportExcelBackup()" style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:20px;background:var(--shc-primary);border:none;color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:'Pretendard',system-ui,sans-serif;white-space:nowrap">
+          ⬇ Export Excel
+        </button>
         <!-- Sync status -->
         <div style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;background:var(--bg-page);border:1px solid var(--border);font-size:11px;font-weight:600;color:var(--txt-muted)">
           <span id="fb-status-dot" style="width:7px;height:7px;border-radius:50%;background:#A3AED0;flex-shrink:0"></span>
@@ -1396,6 +1402,28 @@ function fbInit() {
   sheetsFetchAll(true);
 }
 
+// Normalisasi berbagai format tanggal (YYYY-MM-DD, DD-MM-YYYY, DD/MM/YYYY, dst)
+// menjadi format ISO YYYY-MM-DD, supaya sorting & perbandingan teks selalu benar
+// secara kronologis. Google Sheets kadang mengembalikan tanggal dalam format
+// lokal (DD-MM-YYYY) walau yang dikirim awalnya ISO — ini penyebab utama data
+// hari ini "melompat" ke posisi yang salah saat di-sort.
+function normDate(d) {
+  if (!d) return d;
+  d = String(d).trim();
+  if (/^\d{4}-\d{2}-\d{2}/.test(d)) return d.slice(0, 10); // sudah ISO
+  const m = d.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
+  if (m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`; // DD-MM-YYYY -> ISO
+  const dt = new Date(d);
+  if (!isNaN(dt)) return dt.toISOString().slice(0, 10);
+  return d;
+}
+// Format ISO -> DD-MM-YYYY untuk tampilan (biar tetap familiar seperti sebelumnya)
+function fmtDMY(iso) {
+  if (!iso) return '';
+  const m = String(iso).match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return m ? `${m[3]}-${m[2]}-${m[1]}` : iso;
+}
+
 // Ambil semua data terbaru dari Google Sheets dan render ulang.
 // isFirstLoad=true akan menyalakan polling berkala setelah load pertama sukses.
 async function sheetsFetchAll(isFirstLoad) {
@@ -1403,8 +1431,10 @@ async function sheetsFetchAll(isFirstLoad) {
     const res = await fetch(SHEETS_API_URL + '?action=read');
     const json = await res.json();
     if (!json.ok) throw new Error(json.error || 'read failed');
-    DB.activities = (json.activities || []).sort((a,b) => (b.tanggal||'').localeCompare(a.tanggal||''));
-    DB.issues = (json.issues || []).sort((a,b) => (b.tanggal||'').localeCompare(a.tanggal||''));
+    DB.activities = (json.activities || []).map(a => ({ ...a, tanggal: normDate(a.tanggal) }))
+      .sort((a,b) => (b.tanggal||'').localeCompare(a.tanggal||''));
+    DB.issues = (json.issues || []).map(i => ({ ...i, tanggal: normDate(i.tanggal), selesai: i.selesai ? normDate(i.selesai) : i.selesai }))
+      .sort((a,b) => (b.tanggal||'').localeCompare(a.tanggal||''));
     fbLive = true;
     fbSetStatus('live');
     renderAll();
@@ -2771,7 +2801,7 @@ function renderActTable() {
   }
   tbody.innerHTML = rows.map(a => `
     <tr>
-      <td style="white-space:nowrap;font-size:11px;color:var(--txt-muted)">${a.tanggal}</td>
+      <td style="white-space:nowrap;font-size:11px;color:var(--txt-muted)">${fmtDMY(a.tanggal)}</td>
       <td><span class="factory-pill ${a.factory.toLowerCase()}">${a.factory}</span></td>
       <td style="font-size:11px">${a.pic}</td>
       <td><span style="font-size:11px;font-weight:600">${a.dept}</span></td>
@@ -2799,7 +2829,7 @@ function renderIssTable() {
   }
   tbody.innerHTML = rows.map(iss => `
     <tr>
-      <td class="fcol-1" style="font-size:11px;color:var(--txt-muted)">${iss.tanggal}</td>
+      <td class="fcol-1" style="font-size:11px;color:var(--txt-muted)">${fmtDMY(iss.tanggal)}</td>
       <td class="fcol-2" style="font-size:11px;font-weight:600">${iss.pic}</td>
       <td class="fcol-3"><span class="factory-pill ${iss.factory.toLowerCase()}">${iss.factory}</span></td>
       <td style="font-size:11px">${iss.dept||'—'}</td>
@@ -3006,6 +3036,32 @@ function doUpdateIssue() {
 // ═══════════════════════════════════════
 // UI HELPERS
 // ═══════════════════════════════════════
+function exportExcelBackup() {
+  if (typeof XLSX === 'undefined') { toast('Library Excel belum siap, coba lagi sebentar.'); return; }
+
+  const actRows = DB.activities.slice().sort((a,b)=>b.tanggal.localeCompare(a.tanggal)).map(a => ({
+    Tanggal: fmtDMY(a.tanggal), Factory: a.factory, PIC: a.pic, Departemen: a.dept,
+    Deskripsi: a.desc, 'Hasil/Remark': a.remark || '', Status: a.status || ''
+  }));
+  const issRows = DB.issues.slice().sort((a,b)=>b.tanggal.localeCompare(a.tanggal)).map(i => ({
+    Tanggal: fmtDMY(i.tanggal), Factory: i.factory, PIC: i.pic, Departemen: i.dept || '',
+    'SHI Dept PIC': i.shiPic || '', User: i.user || '', 'Item Order': i.item, Vendor: i.vendor,
+    'Beginning Issue': i.beginIssue || '', 'Issue Description': i.issue, Priority: i.prioritas,
+    'Issue Progress': i.progress || '', 'Target Finish Date': i.target || '',
+    'Finish Date': i.selesai ? fmtDMY(i.selesai) : '', Remark: i.ket || ''
+  }));
+
+  const wb = XLSX.utils.book_new();
+  const wsAct = XLSX.utils.json_to_sheet(actRows);
+  const wsIss = XLSX.utils.json_to_sheet(issRows);
+  XLSX.utils.book_append_sheet(wb, wsAct, 'Aktivitas Harian');
+  XLSX.utils.book_append_sheet(wb, wsIss, 'Issue Tracker');
+
+  const today = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `SHI_Delegate_Backup_${today}.xlsx`);
+  toast('Backup Excel berhasil di-download');
+}
+
 function g(id) { return (document.getElementById(id)?.value||''); }
 function clearForm(ids) {
   ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
