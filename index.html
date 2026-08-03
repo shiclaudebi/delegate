@@ -6,7 +6,6 @@
 <title>SHC · SHI Delegate Dashboard — JJ & JJ2</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 /* ═══════════════════════════════════════
    SHI MONITORING THEME — Dark Navy + Lime
@@ -267,14 +266,14 @@ body {
 .pic-dot-green { width: 6px; height: 6px; background: #05CD44; border-radius: 50%; }
 
 /* ═══════════ CONTENT ═══════════ */
-.content { padding: 24px 28px; }
+.content { padding: 16px 22px; }
 .page { display: none; }
 .page.active { display: block; }
 
 /* ═══════════ PAGE HEADER ═══════════ */
 .page-header {
   display: flex; align-items: flex-start; justify-content: space-between;
-  margin-bottom: 20px;
+  margin-bottom: 14px;
 }
 .page-header-title { font-size: 20px; font-weight: 800; color: var(--txt-primary); }
 .page-header-sub { font-size: 12px; color: var(--txt-muted); margin-top: 2px; }
@@ -509,14 +508,14 @@ body {
 .table-toolbar input:focus, .table-toolbar select:focus {
   border-color: var(--shc-light); box-shadow: 0 0 0 3px rgba(84,49,228,.1);
 }
-.tbl-wrap { overflow-x: auto; overflow-y: auto; max-height: 640px; border-radius: 12px; }
-.tbl-wrap thead th { position: sticky; top: 0; z-index: 15; }
+.tbl-wrap { overflow: auto; max-height: 65vh; }
 table { width: 100%; border-collapse: collapse; font-size: 12px; }
 thead th {
   padding: 10px 14px; text-align: left; font-size: 10px; font-weight: 700;
   color: rgba(255,255,255,.8); text-transform: uppercase; letter-spacing: .06em;
   background: var(--mon-header); white-space: nowrap;
 }
+.tbl-wrap thead th { position: sticky; top: 0; z-index: 5; box-shadow: 0 2px 4px rgba(27,37,89,.18); }
 thead th:first-child { border-radius: 0; }
 tbody td { padding: 10px 14px; border-bottom: 1px solid var(--border-light); color: var(--txt-primary); vertical-align: top; }
 tbody tr:last-child td { border-bottom: none; }
@@ -655,6 +654,8 @@ tbody tr:hover td { background: rgba(240,242,245,.6); }
   border-color: var(--shc-light); box-shadow: 0 0 0 3px rgba(84,49,228,.1);
 }
 .fg textarea { resize: vertical; min-height: 80px; }
+.pic-select, .pic-other, td.pic-cell { text-transform: uppercase; }
+.pic-select option[value=""], .pic-select option[value="__other__"] { text-transform: none; }
 .req { color: var(--c-bad); margin-left: 2px; }
 .btn-cancel { background: var(--bg-page); color: var(--txt-muted); border: 1px solid var(--border); padding: 9px 18px; border-radius: 9px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'Pretendard', system-ui, sans-serif; }
 .btn-cancel:hover { background: var(--border); }
@@ -721,7 +722,7 @@ tbody tr:hover td { background: rgba(240,242,245,.6); }
 .mon-section-label {
   display: flex; align-items: center; gap: 8px;
   font-size: 13px; font-weight: 700; color: var(--txt-primary);
-  margin-bottom: 12px; letter-spacing: -.01em;
+  margin-bottom: 8px; letter-spacing: -.01em;
 }
 .mon-section-bar {
   display: block; width: 4px; height: 18px;
@@ -731,7 +732,7 @@ tbody tr:hover td { background: rgba(240,242,245,.6); }
 /* KPI Grid — 5 cards in a row like the reference */
 .mon-kpi-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 0;
   background: var(--bg-card);
   border: 1px solid var(--border);
@@ -741,9 +742,10 @@ tbody tr:hover td { background: rgba(240,242,245,.6); }
   box-shadow: 0 1px 4px rgba(27,37,89,.05);
 }
 .mon-kpi-card {
-  padding: 20px 22px;
+  padding: 13px 18px;
   border-right: 1px solid var(--border-light);
   position: relative;
+  display: flex; flex-direction: column; justify-content: center;
 }
 .mon-kpi-card:last-child { border-right: none; }
 .mon-kpi-card::before {
@@ -752,11 +754,11 @@ tbody tr:hover td { background: rgba(240,242,245,.6); }
 }
 .mon-kpi-label {
   font-size: 10px; font-weight: 700; color: var(--txt-muted);
-  text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px;
+  text-transform: uppercase; letter-spacing: .08em; margin-bottom: 5px;
 }
 .mon-kpi-val {
-  font-size: 30px; font-weight: 900; line-height: 1.05; letter-spacing: -.03em;
-  margin-bottom: 4px;
+  font-size: 24px; font-weight: 900; line-height: 1.05; letter-spacing: -.03em;
+  margin-bottom: 3px;
 }
 .mon-kpi-val.blue  { color: var(--shc-primary); }
 .mon-kpi-val.red   { color: var(--c-bad); }
@@ -775,11 +777,39 @@ tbody tr:hover td { background: rgba(240,242,245,.6); }
 }
 .mon-kpi-bar-fill { height: 100%; border-radius: 4px; transition: width .6s ease; }
 
+/* PIC performance bars */
+.picbar-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border-light); }
+.picbar-row:last-child { border-bottom: none; }
+.picbar-name { width: 190px; flex-shrink: 0; font-size: 12px; font-weight: 700; color: var(--txt-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: uppercase; }
+.picbar-track { position: relative; flex: 1; height: 24px; background: var(--border-light); border-radius: 6px; overflow: hidden; }
+.picbar-fill { height: 100%; border-radius: 6px; transition: width .6s ease; }
+.picbar-count { position: absolute; right: 10px; top: 0; height: 24px; display: flex; align-items: center; font-size: 11px; font-weight: 700; color: var(--txt-primary); }
+@media (max-width: 640px) { .picbar-name { width: 110px; font-size: 11px; } }
+
+/* PIC pie chart legend */
+.pic-leg-item { display: flex; align-items: center; gap: 8px; padding: 4px 0; border-bottom: 1px solid var(--border-light); font-size: 11.5px; }
+.pic-leg-item:last-child { border-bottom: none; }
+.pic-leg-dot { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+.pic-leg-name { font-weight: 700; color: var(--txt-primary); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+.pic-leg-val { font-weight: 600; color: var(--txt-muted); flex-shrink: 0; }
+
+/* Overview top row: KPI cards + PIC panel side by side */
+.ov-top-row { display: grid; grid-template-columns: minmax(0,2fr) minmax(240px,1fr); gap: 16px; margin-bottom: 14px; align-items: stretch; }
+.ov-top-row .mon-kpi-grid { margin-bottom: 0; height: 100%; }
+.ov-pic-card { margin-bottom: 0; display: flex; flex-direction: column; }
+@media (max-width: 980px) { .ov-top-row { grid-template-columns: 1fr; } }
+
+/* PIC simple stacked bar */
+.pic-stack { display: flex; width: 100%; height: 22px; border-radius: 8px; overflow: hidden; background: var(--border-light); box-shadow: inset 0 0 0 1px rgba(27,37,89,.05); }
+.pic-stack-seg { height: 100%; transition: width .6s ease; }
+.pic-stack-legend { margin-top: 10px; }
+
 /* 2-column row */
 .mon-row-2col {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
+  align-items: stretch;
 }
 
 /* 3-column row */
@@ -787,15 +817,23 @@ tbody tr:hover td { background: rgba(240,242,245,.6); }
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   gap: 16px;
+  align-items: stretch;
 }
+/* Content that should expand to fill card height (removes trailing white space) */
+.mon-row-2col .feed-list, .mon-row-3col .feed-list,
+.mon-row-2col .dept-matrix, .mon-row-3col .dept-matrix,
+.mon-row-2col #ov-dept-rank, .mon-row-3col #ov-dept-rank { flex: 1 1 auto; justify-content: space-between; }
+#ov-dept-rank { display: flex; flex-direction: column; }
+.mon-row-2col #date-bars-new { flex: 1 1 auto; display: flex; flex-direction: column; min-height: 150px; }
 
 /* Mon card — white card with subtle shadow */
 .mon-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: var(--radius-card);
-  padding: 20px 22px;
+  padding: 14px 16px;
   box-shadow: 0 1px 4px rgba(27,37,89,.04);
+  display: flex; flex-direction: column;
 }
 .mon-card-head {
   font-size: 13px; font-weight: 700; color: var(--txt-primary);
@@ -804,24 +842,29 @@ tbody tr:hover td { background: rgba(240,242,245,.6); }
 .mon-card-head-sub {
   font-size: 11px; font-weight: 400; color: var(--txt-muted);
 }
-.mon-divider { height: 1px; background: var(--border-light); margin: 14px 0; }
+.mon-divider { height: 1px; background: var(--border-light); margin: 10px 0; }
 
 /* Issue grid inside mon card */
 .mon-issue-grid {
   display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px;
 }
+/* Issue breakdown — small transparent chips side by side */
+.iss-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.iss-chip { flex: 1 1 0; min-width: 62px; padding: 6px 8px; border: 1px solid var(--border-light); border-radius: 8px; background: transparent; text-align: center; }
+.iss-chip-label { font-size: 9px; font-weight: 700; color: var(--txt-muted); text-transform: uppercase; letter-spacing: .04em; }
+.iss-chip-num { font-size: 18px; font-weight: 900; line-height: 1.15; letter-spacing: -.02em; }
 
 /* Mon table — compact table matching reference */
 .mon-tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
 .mon-tbl thead th {
   background: var(--mon-header); color: rgba(255,255,255,.85);
-  padding: 8px 12px; font-size: 10px; font-weight: 600;
+  padding: 6px 10px; font-size: 10px; font-weight: 600;
   text-transform: uppercase; letter-spacing: .06em; white-space: nowrap; text-align: left;
 }
 .mon-tbl thead th:first-child { border-radius: 8px 0 0 8px; }
 .mon-tbl thead th:last-child  { border-radius: 0 8px 8px 0; }
 .mon-tbl tbody td {
-  padding: 8px 12px; border-bottom: 1px solid var(--border-light);
+  padding: 6px 10px; border-bottom: 1px solid var(--border-light);
   color: var(--txt-primary); vertical-align: middle;
 }
 .mon-tbl tbody tr:last-child td { border-bottom: none; }
@@ -973,10 +1016,6 @@ tbody tr:hover td { background: rgba(240,242,245,.6); }
         </div>
       </div>
       <div class="topbar-right">
-        <!-- Export backup -->
-        <button onclick="exportExcelBackup()" style="display:flex;align-items:center;gap:6px;padding:7px 14px;border-radius:20px;background:var(--shc-primary);border:none;color:#fff;font-size:11px;font-weight:700;cursor:pointer;font-family:'Pretendard',system-ui,sans-serif;white-space:nowrap">
-          ⬇ Export Excel
-        </button>
         <!-- Sync status -->
         <div style="display:flex;align-items:center;gap:6px;padding:5px 12px;border-radius:20px;background:var(--bg-page);border:1px solid var(--border);font-size:11px;font-weight:600;color:var(--txt-muted)">
           <span id="fb-status-dot" style="width:7px;height:7px;border-radius:50%;background:#A3AED0;flex-shrink:0"></span>
@@ -1007,48 +1046,44 @@ tbody tr:hover td { background: rgba(240,242,245,.6); }
           <span id="page-overview-kpi-label">KPI Kumulatif — Ringkasan Lapangan (JJ &amp; JJ2)</span>
         </div>
 
-        <div class="mon-kpi-grid">
-          <!-- Card 1: Total Aktivitas -->
-          <div class="mon-kpi-card">
-            <div class="mon-kpi-label" data-i18n="kpi_activities">Total Aktivitas</div>
-            <div class="mon-kpi-val blue" id="kpi-act">—</div>
-            <div class="mon-kpi-sub" id="kpi-act-meta">JJ + JJ2</div>
+        <div class="ov-top-row">
+          <div class="mon-kpi-grid">
+            <!-- Card 1: Total Aktivitas -->
+            <div class="mon-kpi-card">
+              <div class="mon-kpi-label" data-i18n="kpi_activities">Total Aktivitas</div>
+              <div class="mon-kpi-val blue" id="kpi-act">—</div>
+              <div class="mon-kpi-sub" id="kpi-act-meta">JJ + JJ2</div>
+            </div>
+            <!-- Card 2: Issue Open -->
+            <div class="mon-kpi-card">
+              <div class="mon-kpi-label" data-i18n="kpi_open_issues">Issue Open</div>
+              <div class="mon-kpi-val red" id="kpi-open">—</div>
+              <div class="mon-kpi-sub" id="kpi-open-meta">dari total issue</div>
+              <div class="mon-kpi-badge-row" id="kpi-open-badge"></div>
+            </div>
+            <!-- Card 3: Completion Rate -->
+            <div class="mon-kpi-card">
+              <div class="mon-kpi-label">Completion Rate</div>
+              <div class="mon-kpi-val amber" id="kpi-rate">—</div>
+              <div class="mon-kpi-sub" id="kpi-rate-meta">aktivitas selesai</div>
+              <div class="mon-kpi-bar-wrap"><div class="mon-kpi-bar-fill" id="kpi-rate-bar" style="background:#FFCB45;width:0%"></div></div>
+            </div>
           </div>
-          <!-- Card 2: Issue Open -->
-          <div class="mon-kpi-card">
-            <div class="mon-kpi-label" data-i18n="kpi_open_issues">Issue Open</div>
-            <div class="mon-kpi-val red" id="kpi-open">—</div>
-            <div class="mon-kpi-sub" id="kpi-open-meta">dari total issue</div>
-            <div class="mon-kpi-badge-row" id="kpi-open-badge"></div>
-          </div>
-          <!-- Card 3: Completion Rate -->
-          <div class="mon-kpi-card">
-            <div class="mon-kpi-label">Completion Rate</div>
-            <div class="mon-kpi-val amber" id="kpi-rate">—</div>
-            <div class="mon-kpi-sub" id="kpi-rate-meta">aktivitas selesai</div>
-            <div class="mon-kpi-bar-wrap"><div class="mon-kpi-bar-fill" id="kpi-rate-bar" style="background:#FFCB45;width:0%"></div></div>
-          </div>
-          <!-- Card 4: Hari Aktif -->
-          <div class="mon-kpi-card">
-            <div class="mon-kpi-label">Hari Aktif</div>
-            <div class="mon-kpi-val green" id="kpi-rep">—</div>
-            <div class="mon-kpi-sub" id="kpi-rep-meta">JJ + JJ2</div>
-          </div>
-          <!-- Card 5: Hari Laporan -->
-          <div class="mon-kpi-card">
-            <div class="mon-kpi-label" data-i18n="kpi_days">Hari Laporan</div>
-            <div class="mon-kpi-val navy" id="kpi-days">—</div>
-            <div class="mon-kpi-sub" id="kpi-days-meta" style="display:none">tanggal unik</div>
+
+          <!-- PIC input frequency — beside Completion Rate -->
+          <div class="mon-card ov-pic-card">
+            <div class="mon-card-head" data-i18n="ov_pic_perf">Aktivitas per PIC <span class="mon-card-head-sub" data-i18n="ov_pic_perf_sub">Frekuensi input per PIC</span></div>
+            <div id="pic-perf" style="margin-top:12px"></div>
           </div>
         </div>
 
         <!-- ════ SECTION B: FACTORY PERFORMANCE ════ -->
-        <div class="mon-section-label" style="margin-top:24px">
+        <div class="mon-section-label" style="margin-top:14px">
           <span class="mon-section-bar"></span>
           <span>Performa Factory — Completed vs Total Aktivitas</span>
         </div>
 
-        <div class="mon-row-2col" style="margin-bottom:20px">
+        <div class="mon-row-2col" style="margin-bottom:14px">
           <!-- Left: Factory gauges + date activity bars -->
           <div class="mon-card">
             <div class="mon-card-head">Performa Factory <span class="mon-card-head-sub">Completed / Total</span></div>
@@ -1061,7 +1096,7 @@ tbody tr:hover td { background: rgba(240,242,245,.6); }
           <!-- Right: Issue breakdown + resolution -->
           <div class="mon-card">
             <div class="mon-card-head">Issue Breakdown</div>
-            <div class="mon-issue-grid" id="issue-scorecard"></div>
+            <div class="iss-chips" id="issue-scorecard"></div>
             <div class="mon-divider"></div>
             <div class="mon-card-head">Tingkat Resolusi</div>
             <div style="text-align:center;padding:10px 0 6px">
@@ -1080,7 +1115,7 @@ tbody tr:hover td { background: rgba(240,242,245,.6); }
         </div>
 
         <!-- ════ SECTION C: DEPT MATRIX + OPEN ISSUES ════ -->
-        <div class="mon-row-2col" style="margin-bottom:20px">
+        <div class="mon-row-2col" style="margin-bottom:14px;grid-template-columns:1.15fr 0.85fr">
           <!-- Dept activity matrix -->
           <div class="mon-card">
             <div class="mon-card-head">Aktivitas per Departemen <span class="mon-card-head-sub">JJ vs JJ2</span></div>
@@ -1102,7 +1137,7 @@ tbody tr:hover td { background: rgba(240,242,245,.6); }
         </div>
 
         <!-- ════ SECTION D: ACTIVITY FEED + TOP DEPT + SUMMARY ════ -->
-        <div class="mon-row-3col" style="margin-bottom:20px">
+        <div class="mon-row-3col" style="margin-bottom:14px">
           <!-- Feed aktivitas terkini -->
           <div class="mon-card" style="grid-column:span 2">
             <div class="mon-card-head">Feed Aktivitas Terkini <span class="mon-card-head-sub">5 hari terakhir</span></div>
@@ -1117,7 +1152,7 @@ tbody tr:hover td { background: rgba(240,242,245,.6); }
         </div>
 
         <!-- ════ SECTION E: SUMMARY TABLE ════ -->
-        <div class="mon-card" style="margin-bottom:20px">
+        <div class="mon-card" style="margin-bottom:14px">
           <div class="mon-card-head">Ringkasan Aktivitas per Factory</div>
           <div style="overflow-x:auto;margin-top:12px">
             <table class="summary-table">
@@ -1140,7 +1175,7 @@ tbody tr:hover td { background: rgba(240,242,245,.6); }
           <span class="mon-section-bar"></span>
           <span>Inti Monitoring — Perhatian</span>
         </div>
-        <div class="mon-alerts-grid" id="mon-alerts" style="margin-bottom:24px"></div>
+        <div class="mon-alerts-grid" id="mon-alerts" style="margin-bottom:14px"></div>
 
         <!-- hidden canvases for compatibility -->
         <canvas id="chart-prior" style="display:none"></canvas>
@@ -1281,7 +1316,9 @@ tbody tr:hover td { background: rgba(240,242,245,.6); }
         <div class="fg"><label data-i18n="field_date">Tanggal<span class="req">*</span></label><input type="date" id="fa-tanggal"></div>
         <div class="fg"><label data-i18n="field_factory">Factory<span class="req">*</span></label>
           <select id="fa-factory"><option value="">— Pilih —</option><option>JJ</option><option>JJ2</option></select></div>
-        <div class="fg"><label data-i18n="field_pic_name">Nama PIC<span class="req">*</span></label><input type="text" id="fa-pic" data-i18n-ph="ph_full_name" placeholder="Nama lengkap"></div>
+        <div class="fg"><label data-i18n="field_pic_name">Nama PIC<span class="req">*</span></label>
+          <select id="fa-pic" class="pic-select" onchange="onPicSelectChange('fa-pic','fa-pic-other')"></select>
+          <input type="text" id="fa-pic-other" class="pic-other" data-i18n-ph="ph_full_name" placeholder="Nama lengkap" style="display:none;margin-top:6px"></div>
         <div class="fg"><label data-i18n="field_dept">Departemen<span class="req">*</span></label><input type="text" id="fa-dept" data-i18n-ph="ph_dept" placeholder="MRO, PS, MEP..."></div>
         <div class="fg full"><label data-i18n="field_desc">Deskripsi Aktivitas<span class="req">*</span></label><textarea id="fa-desc" data-i18n-ph="ph_activity_desc" placeholder="Jelaskan aktivitas..."></textarea></div>
         <div class="fg full"><label data-i18n="field_remark">Hasil / Remark</label><textarea id="fa-remark" data-i18n-ph="ph_remark" placeholder="Hasil, catatan, tindak lanjut..." style="min-height:64px"></textarea></div>
@@ -1311,7 +1348,9 @@ tbody tr:hover td { background: rgba(240,242,245,.6); }
         <div class="fg"><label data-i18n="field_date">Tanggal<span class="req">*</span></label><input type="date" id="fi-tanggal"></div>
         <div class="fg"><label data-i18n="field_factory">Factory<span class="req">*</span></label>
           <select id="fi-factory"><option value="">— Pilih —</option><option>JJ</option><option>JJ2</option></select></div>
-        <div class="fg"><label data-i18n="field_pic_name">Nama PIC<span class="req">*</span></label><input type="text" id="fi-pic" data-i18n-ph="ph_pic_name" placeholder="Nama PIC"></div>
+        <div class="fg"><label data-i18n="field_pic_name">Nama PIC<span class="req">*</span></label>
+          <select id="fi-pic" class="pic-select" onchange="onPicSelectChange('fi-pic','fi-pic-other')"></select>
+          <input type="text" id="fi-pic-other" class="pic-other" data-i18n-ph="ph_pic_name" placeholder="Nama PIC" style="display:none;margin-top:6px"></div>
         <div class="fg"><label data-i18n="field_dept">Departemen</label><input type="text" id="fi-dept" data-i18n-ph="ph_dept_issue" placeholder="RSM, MATERIAL..."></div>
         <div class="fg"><label data-i18n="col_shi_pic">SHI Dept PIC</label><input type="text" id="fi-shipic" placeholder="PS - RA, RSM - Ade..."></div>
         <div class="fg"><label data-i18n="col_user">User</label><input type="text" id="fi-user" placeholder="Warehouse Chemical, Plant Prod..."></div>
@@ -1402,28 +1441,6 @@ function fbInit() {
   sheetsFetchAll(true);
 }
 
-// Normalisasi berbagai format tanggal (YYYY-MM-DD, DD-MM-YYYY, DD/MM/YYYY, dst)
-// menjadi format ISO YYYY-MM-DD, supaya sorting & perbandingan teks selalu benar
-// secara kronologis. Google Sheets kadang mengembalikan tanggal dalam format
-// lokal (DD-MM-YYYY) walau yang dikirim awalnya ISO — ini penyebab utama data
-// hari ini "melompat" ke posisi yang salah saat di-sort.
-function normDate(d) {
-  if (!d) return d;
-  d = String(d).trim();
-  if (/^\d{4}-\d{2}-\d{2}/.test(d)) return d.slice(0, 10); // sudah ISO
-  const m = d.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
-  if (m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`; // DD-MM-YYYY -> ISO
-  const dt = new Date(d);
-  if (!isNaN(dt)) return dt.toISOString().slice(0, 10);
-  return d;
-}
-// Format ISO -> DD-MM-YYYY untuk tampilan (biar tetap familiar seperti sebelumnya)
-function fmtDMY(iso) {
-  if (!iso) return '';
-  const m = String(iso).match(/^(\d{4})-(\d{2})-(\d{2})/);
-  return m ? `${m[3]}-${m[2]}-${m[1]}` : iso;
-}
-
 // Ambil semua data terbaru dari Google Sheets dan render ulang.
 // isFirstLoad=true akan menyalakan polling berkala setelah load pertama sukses.
 async function sheetsFetchAll(isFirstLoad) {
@@ -1431,10 +1448,8 @@ async function sheetsFetchAll(isFirstLoad) {
     const res = await fetch(SHEETS_API_URL + '?action=read');
     const json = await res.json();
     if (!json.ok) throw new Error(json.error || 'read failed');
-    DB.activities = (json.activities || []).map(a => ({ ...a, tanggal: normDate(a.tanggal) }))
-      .sort((a,b) => (b.tanggal||'').localeCompare(a.tanggal||''));
-    DB.issues = (json.issues || []).map(i => ({ ...i, tanggal: normDate(i.tanggal), selesai: i.selesai ? normDate(i.selesai) : i.selesai }))
-      .sort((a,b) => (b.tanggal||'').localeCompare(a.tanggal||''));
+    DB.activities = (json.activities || []).sort((a,b) => dateKey(b.tanggal).localeCompare(dateKey(a.tanggal)));
+    DB.issues = (json.issues || []).sort((a,b) => dateKey(b.tanggal).localeCompare(dateKey(a.tanggal)));
     fbLive = true;
     fbSetStatus('live');
     renderAll();
@@ -1492,6 +1507,7 @@ const LANG = {
     page_overview_title: 'Dashboard Overview',
     page_overview_sub: 'JJ & JJ2 Factory — Monitoring Real-time',
     kpi_activities: 'Total Aktivitas',
+    ov_pic_perf: 'Aktivitas per PIC', ov_pic_perf_sub: 'Frekuensi input per PIC',
     kpi_all_factory: 'Semua factory',
     kpi_open_issues: 'Issue Open',
     kpi_not_done: 'Belum selesai',
@@ -1532,6 +1548,7 @@ const LANG = {
     modal_update_issue: 'Update Progress Issue',
     field_date: 'Tanggal', field_factory: 'Factory',
     field_pic_name: 'Nama PIC', field_dept: 'Departemen',
+    pic_choose: '— Pilih PIC —', pic_other: '＋ Nama lain…',
     field_desc: 'Deskripsi Aktivitas', field_note: 'Keterangan',
     field_status: 'Status', field_issue_desc: 'Deskripsi Issue',
     st_completed: 'Selesai', st_in_progress: 'Berlangsung', st_on_hold: 'Ditunda', st_waiting: 'Menunggu',
@@ -1612,6 +1629,7 @@ const LANG = {
     page_overview_title: 'Dashboard Overview',
     page_overview_sub: 'JJ & JJ2 Factory — Real-time Monitoring',
     kpi_activities: 'Total Activities',
+    ov_pic_perf: 'Activities per PIC', ov_pic_perf_sub: 'Input frequency per PIC',
     kpi_all_factory: 'All factories',
     kpi_open_issues: 'Open Issues',
     kpi_not_done: 'Not yet resolved',
@@ -1652,6 +1670,7 @@ const LANG = {
     modal_update_issue: 'Update Issue Progress',
     field_date: 'Date', field_factory: 'Factory',
     field_pic_name: 'PIC Name', field_dept: 'Department',
+    pic_choose: '— Select PIC —', pic_other: '＋ Other name…',
     field_desc: 'Activity Description', field_note: 'Notes',
     field_status: 'Status', field_issue_desc: 'Issue Description',
     st_completed: 'Completed', st_in_progress: 'In Progress', st_on_hold: 'On Hold', st_waiting: 'Waiting',
@@ -1732,6 +1751,7 @@ const LANG = {
     page_overview_title: '대시보드 개요',
     page_overview_sub: 'JJ & JJ2 공장 — 실시간 모니터링',
     kpi_activities: '총 활동',
+    ov_pic_perf: 'PIC별 활동', ov_pic_perf_sub: 'PIC별 입력 빈도',
     kpi_all_factory: '모든 공장',
     kpi_open_issues: '미해결 이슈',
     kpi_not_done: '미완료',
@@ -1772,6 +1792,7 @@ const LANG = {
     modal_update_issue: '이슈 진행 상황 업데이트',
     field_date: '날짜', field_factory: '공장',
     field_pic_name: 'PIC 이름', field_dept: '부서',
+    pic_choose: '— PIC 선택 —', pic_other: '＋ 다른 이름…',
     field_desc: '활동 설명', field_note: '메모',
     field_status: '상태', field_issue_desc: '이슈 설명',
     st_completed: '완료', st_in_progress: '진행 중', st_on_hold: '보류', st_waiting: '대기',
@@ -2088,8 +2109,18 @@ function fmtDate(dateStr) {
   return `${dd}-${MONTHS[mm]}-${yy}`;
 }
 
+// Comparable key (YYYYMMDD) from either YYYY-MM-DD or dd-mm-YYYY, so sorting is chronological.
+function dateKey(s) {
+  if (!s) return '';
+  const p = String(s).split('-');
+  if (p.length !== 3) return String(s);
+  if (p[0].length === 4) return p[0] + p[1].padStart(2,'0') + p[2].padStart(2,'0'); // YYYY-MM-DD
+  return p[2] + p[1].padStart(2,'0') + p[0].padStart(2,'0');                         // dd-mm-YYYY
+}
+
 function renderAll() {
-  renderKPI(); renderOverviewSignals(); renderDeptMatrix(); renderIssueScorecard();
+  normalizePicData();
+  renderKPI(); renderPicPerf(); renderOverviewSignals(); renderDeptMatrix(); renderIssueScorecard();
   renderResolutionNew(); renderFactoryGauges(); renderDateBarsNew();
   renderOvIssueHeat(); renderOvFeed(); renderDeptRank();
   renderDeptBars(); renderDateBars();
@@ -2154,6 +2185,35 @@ function renderMonAlerts() {
     </div>`).join('');
 }
 
+const PIC_COLORS = ['#5431E4','#856AEA','#2B3674','#C0FF45','#A8E832','#030050','#B4A7F0','#6B4FE8'];
+function renderPicPerf() {
+  const host = document.getElementById('pic-perf');
+  if (!host) return;
+  // Count how many activities each PIC has filled in (input frequency).
+  const map = {};
+  DB.activities.forEach(a => { const p = canonPic(a.pic) || '—'; map[p] = (map[p]||0) + 1; });
+  const rows = Object.entries(map).map(([pic,count]) => ({ pic, count })).sort((a,b) => b.count - a.count);
+  const total = rows.reduce((s,r) => s + r.count, 0);
+  if (!rows.length || !total) {
+    host.innerHTML = `<div style="color:var(--txt-muted);font-size:12px;padding:8px 0">${t('empty_act')||'Belum ada data'}</div>`;
+    return;
+  }
+  const colors = rows.map((_,i) => PIC_COLORS[i % PIC_COLORS.length]);
+  const segs = rows.map((r,i) => {
+    const pct = r.count / total * 100;
+    return `<div class="pic-stack-seg" style="width:${pct}%;background:${colors[i]}" title="${r.pic}: ${r.count} (${Math.round(pct)}%)"></div>`;
+  }).join('');
+  const legend = rows.map((r,i) => {
+    const pct = Math.round(r.count / total * 100);
+    return `<div class="pic-leg-item">
+      <span class="pic-leg-dot" style="background:${colors[i]}"></span>
+      <span class="pic-leg-name" title="${r.pic}">${r.pic}</span>
+      <span class="pic-leg-val">${r.count} · ${pct}%</span>
+    </div>`;
+  }).join('');
+  host.innerHTML = `<div class="pic-stack">${segs}</div><div class="pic-stack-legend">${legend}</div>`;
+}
+
 function renderKPI() {
   const total = DB.issues.length;
   const open = DB.issues.filter(i => !['Delivery Completed','Completed','Closed'].includes(i.progress)).length;
@@ -2164,8 +2224,6 @@ function renderKPI() {
   document.getElementById('kpi-act').textContent  = DB.activities.length;
   document.getElementById('kpi-open').textContent = open;
   document.getElementById('kpi-iss') && (document.getElementById('kpi-iss').textContent = total);
-  document.getElementById('kpi-rep').textContent  = [...new Set(DB.activities.map(a=>a.tanggal))].length;
-  document.getElementById('kpi-days').textContent = dates;
   document.getElementById('kpi-rate').textContent = rate + '%';
 
   // meta text
@@ -2173,10 +2231,6 @@ function renderKPI() {
   if (openMeta) openMeta.textContent = `dari ${total} total issue`;
   const rateMeta = document.getElementById('kpi-rate-meta');
   if (rateMeta) rateMeta.textContent = `${done} dari ${DB.activities.length} aktivitas`;
-  const repMeta = document.getElementById('kpi-rep-meta');
-  if (repMeta) repMeta.textContent = 'JJ + JJ2';
-  const daysMeta = document.getElementById('kpi-days-meta');
-  if (daysMeta) daysMeta.style.display = 'none';
 
   // mini bars (legacy — now in mon-kpi-bar-wrap)
   const openBar = document.getElementById('kpi-open-bar');
@@ -2271,9 +2325,9 @@ function renderIssueScorecard() {
     { label: 'Medium',       num: medium,   color: '#D97706' },
     { label: 'Low',          num: low,      color: '#059669' },
   ].map(s => `
-    <div class="scorecard">
-      <div class="scorecard-label">${s.label}</div>
-      <div class="scorecard-num" style="color:${s.color}">${s.num}</div>
+    <div class="iss-chip">
+      <div class="iss-chip-label">${s.label}</div>
+      <div class="iss-chip-num" style="color:${s.color}">${s.num}</div>
     </div>`).join('');
 }
 
@@ -2343,22 +2397,48 @@ function renderFactoryGauges() {
 }
 
 function renderDateBarsNew() {
-  const c = {};
-  DB.activities.forEach(a => { c[a.tanggal]=(c[a.tanggal]||0)+1; });
-  const sorted = Object.entries(c).sort((a,b)=>a[0].localeCompare(b[0])).slice(-10);
-  const max = Math.max(...sorted.map(x=>x[1]),1);
   const el = document.getElementById('date-bars-new');
   if (!el) return;
-  el.innerHTML = sorted.map(([d,n]) => `
-    <div class="hbar-row">
-      <div class="hbar-label">${fmtDate(d)}</div>
-      <div class="hbar-track"><div class="hbar-fill" style="width:${Math.round(n/max*100)}%;background:linear-gradient(to right,#5431E4,#856AEA)"></div></div>
-      <div class="hbar-count">${n}</div>
-    </div>`).join('');
+  const c = {};
+  DB.activities.forEach(a => { c[a.tanggal]=(c[a.tanggal]||0)+1; });
+  const sorted = Object.entries(c).sort((a,b)=>dateKey(a[0]).localeCompare(dateKey(b[0]))).slice(-10);
+  if (charts['date-trend']) { charts['date-trend'].destroy(); delete charts['date-trend']; }
+  if (!sorted.length) {
+    el.innerHTML = `<div style="color:var(--txt-muted);font-size:12px;padding:8px 0">${t('empty_act')||'Belum ada data'}</div>`;
+    return;
+  }
+  const labels = sorted.map(x => fmtDate(x[0]));
+  const data = sorted.map(x => x[1]);
+  el.innerHTML = `<div style="flex:1 1 auto;min-height:150px;position:relative"><canvas id="date-trend-chart"></canvas></div>`;
+  const ctx = document.getElementById('date-trend-chart');
+  if (!ctx || typeof Chart === 'undefined') return;
+  const g = ctx.getContext('2d');
+  const grad = g.createLinearGradient(0, 0, 0, 220);
+  grad.addColorStop(0, 'rgba(84,49,228,.33)');
+  grad.addColorStop(1, 'rgba(84,49,228,.02)');
+  charts['date-trend'] = new Chart(ctx, {
+    type: 'line',
+    data: { labels, datasets: [{
+      data, borderColor: '#5431E4', backgroundColor: grad,
+      borderWidth: 2.5, fill: true, tension: 0.4,
+      pointRadius: 3, pointBackgroundColor: '#5431E4', pointBorderColor: '#fff', pointBorderWidth: 1.5, pointHoverRadius: 6
+    }]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { displayColors: false, callbacks: { label: c => `${c.raw}` } }
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#8A94AD', maxRotation: 0, autoSkip: true, maxTicksLimit: 7 } },
+        y: { beginAtZero: true, grid: { color: 'rgba(27,37,89,.06)' }, ticks: { font: { size: 10 }, color: '#8A94AD', precision: 0 } }
+      }
+    }
+  });
 }
 
 function renderOvIssueHeat() {
-  const openIss = DB.issues.filter(isOpenIssue).slice().sort((a,b)=>b.tanggal.localeCompare(a.tanggal));
+  const openIss = DB.issues.filter(isOpenIssue).slice().sort((a,b)=>dateKey(b.tanggal).localeCompare(dateKey(a.tanggal)));
   const label = document.getElementById('ov-iss-count-label');
   if (label) label.textContent = `${openIss.length} issue open`;
   const tbody = document.getElementById('ov-issue-heat-body');
@@ -2500,7 +2580,7 @@ function renderDeptBars() {
 function renderDateBars() {
   const c = {};
   DB.activities.forEach(a => { c[a.tanggal]=(c[a.tanggal]||0)+1; });
-  const sorted = Object.entries(c).sort((a,b)=>a[0].localeCompare(b[0])).slice(-10);
+  const sorted = Object.entries(c).sort((a,b)=>dateKey(a[0]).localeCompare(dateKey(b[0]))).slice(-10);
   const max = Math.max(...sorted.map(x=>x[1]),1);
   document.getElementById('date-bars').innerHTML = sorted.map(([d,n]) => `
     <div class="hbar-row">
@@ -2696,7 +2776,7 @@ function renderResolutionRing() {
 
 function renderRecentIssues() {
   const list = document.getElementById('recent-issues-list');
-  const items = DB.issues.slice().sort((a,b) => b.tanggal.localeCompare(a.tanggal)).slice(0, 4);
+  const items = DB.issues.slice().sort((a,b) => dateKey(b.tanggal).localeCompare(dateKey(a.tanggal))).slice(0, 4);
   if (!items.length) { list.innerHTML = `<div style="text-align:center;padding:24px;color:var(--txt-muted);font-size:12px">${t('ov_no_issues')}</div>`; return; }
   list.innerHTML = items.map(iss => {
     const open = isOpenIssue(iss);
@@ -2717,7 +2797,7 @@ function renderRecentIssues() {
 
 function renderRecentActivity() {
   const list = document.getElementById('recent-activity-list');
-  const items = DB.activities.slice().sort((a,b) => b.tanggal.localeCompare(a.tanggal)).slice(0, 3);
+  const items = DB.activities.slice().sort((a,b) => dateKey(b.tanggal).localeCompare(dateKey(a.tanggal))).slice(0, 3);
   if (!items.length) { list.innerHTML = `<div style="text-align:center;padding:12px;color:var(--txt-muted);font-size:12px">${t('ov_no_activity')}</div>`; return; }
   list.innerHTML = items.map(act => `
     <div class="recent-item">
@@ -2792,7 +2872,7 @@ function renderActTable() {
   const rows = DB.activities.filter(a =>
     (!q || [a.dept,a.desc,a.pic,a.ket].some(x=>(x||'').toLowerCase().includes(q))) &&
     (!f || a.factory===f) && (!d || a.dept===d)
-  ).sort((a,b)=>b.tanggal.localeCompare(a.tanggal));
+  ).sort((a,b)=>dateKey(b.tanggal).localeCompare(dateKey(a.tanggal)));
 
   const tbody = document.getElementById('act-tbody');
   if (!rows.length) {
@@ -2801,9 +2881,9 @@ function renderActTable() {
   }
   tbody.innerHTML = rows.map(a => `
     <tr>
-      <td style="white-space:nowrap;font-size:11px;color:var(--txt-muted)">${fmtDMY(a.tanggal)}</td>
+      <td style="white-space:nowrap;font-size:11px;color:var(--txt-muted)">${a.tanggal}</td>
       <td><span class="factory-pill ${a.factory.toLowerCase()}">${a.factory}</span></td>
-      <td style="font-size:11px">${a.pic}</td>
+      <td class="pic-cell" style="font-size:11px">${a.pic}</td>
       <td><span style="font-size:11px;font-weight:600">${a.dept}</span></td>
       <td class="td-trunc" title="${a.desc.replace(/"/g,'&quot;')}">${a.desc}</td>
       <td class="td-trunc" style="max-width:140px;color:var(--txt-muted);font-size:11px" title="${(a.remark||'').replace(/"/g,'&quot;')}">${a.remark||'—'}</td>
@@ -2820,7 +2900,7 @@ function renderIssTable() {
   const rows = DB.issues.filter(i =>
     (!q || [i.item,i.vendor,i.issue,i.pic,i.dept].some(x=>(x||'').toLowerCase().includes(q))) &&
     (!f || i.factory===f) && (!p || i.prioritas===p)
-  ).sort((a,b)=>b.tanggal.localeCompare(a.tanggal));
+  ).sort((a,b)=>dateKey(b.tanggal).localeCompare(dateKey(a.tanggal)));
 
   const tbody = document.getElementById('iss-tbody');
   if (!rows.length) {
@@ -2829,8 +2909,8 @@ function renderIssTable() {
   }
   tbody.innerHTML = rows.map(iss => `
     <tr>
-      <td class="fcol-1" style="font-size:11px;color:var(--txt-muted)">${fmtDMY(iss.tanggal)}</td>
-      <td class="fcol-2" style="font-size:11px;font-weight:600">${iss.pic}</td>
+      <td class="fcol-1" style="font-size:11px;color:var(--txt-muted)">${iss.tanggal}</td>
+      <td class="fcol-2 pic-cell" style="font-size:11px;font-weight:600">${iss.pic}</td>
       <td class="fcol-3"><span class="factory-pill ${iss.factory.toLowerCase()}">${iss.factory}</span></td>
       <td style="font-size:11px">${iss.dept||'—'}</td>
       <td style="font-size:11px">${iss.shiPic||'—'}</td>
@@ -2857,7 +2937,7 @@ let editingIssId = null;
 
 function saveActivity() {
   const v = {
-    tanggal: g('fa-tanggal'), factory: g('fa-factory'), pic: g('fa-pic').trim(),
+    tanggal: g('fa-tanggal'), factory: g('fa-factory'), pic: getPicValue('fa-pic','fa-pic-other'),
     dept: g('fa-dept').trim(), desc: g('fa-desc').trim(),
     remark: g('fa-remark').trim(), status: g('fa-status'), ket: g('fa-ket').trim()
   };
@@ -2893,7 +2973,7 @@ function openEditActivity(id) {
   editingActId = id;
   document.getElementById('fa-tanggal').value = (d => { if(!d) return ''; const p=d.split('-'); return p.length===3&&p[0].length===2?`${p[2]}-${p[1]}-${p[0]}`:d; })(a.tanggal);
   document.getElementById('fa-factory').value = a.factory;
-  document.getElementById('fa-pic').value     = a.pic;
+  setPicSelect('fa-pic','fa-pic-other', a.pic);
   document.getElementById('fa-dept').value    = a.dept;
   document.getElementById('fa-desc').value    = a.desc;
   document.getElementById('fa-remark').value  = a.remark||'';
@@ -2922,7 +3002,7 @@ function deleteActivity() {
 
 function saveIssue() {
   const v = {
-    tanggal: g('fi-tanggal'), factory: g('fi-factory'), pic: g('fi-pic').trim(),
+    tanggal: g('fi-tanggal'), factory: g('fi-factory'), pic: getPicValue('fi-pic','fi-pic-other'),
     dept: g('fi-dept').trim(), shiPic: g('fi-shipic').trim(), user: g('fi-user').trim(),
     item: g('fi-item').trim(), vendor: g('fi-vendor').trim(), beginIssue: g('fi-begin').trim(),
     issue: g('fi-issue').trim(), prioritas: g('fi-prior'),
@@ -2960,7 +3040,7 @@ function openEditIssue(id) {
   editingIssId = id;
   document.getElementById('fi-tanggal').value = iss.tanggal;
   document.getElementById('fi-factory').value = iss.factory;
-  document.getElementById('fi-pic').value     = iss.pic;
+  setPicSelect('fi-pic','fi-pic-other', iss.pic);
   document.getElementById('fi-dept').value    = iss.dept||'';
   document.getElementById('fi-shipic').value  = iss.shiPic||'';
   document.getElementById('fi-user').value    = iss.user||'';
@@ -3036,32 +3116,74 @@ function doUpdateIssue() {
 // ═══════════════════════════════════════
 // UI HELPERS
 // ═══════════════════════════════════════
-function exportExcelBackup() {
-  if (typeof XLSX === 'undefined') { toast('Library Excel belum siap, coba lagi sebentar.'); return; }
-
-  const actRows = DB.activities.slice().sort((a,b)=>b.tanggal.localeCompare(a.tanggal)).map(a => ({
-    Tanggal: fmtDMY(a.tanggal), Factory: a.factory, PIC: a.pic, Departemen: a.dept,
-    Deskripsi: a.desc, 'Hasil/Remark': a.remark || '', Status: a.status || ''
-  }));
-  const issRows = DB.issues.slice().sort((a,b)=>b.tanggal.localeCompare(a.tanggal)).map(i => ({
-    Tanggal: fmtDMY(i.tanggal), Factory: i.factory, PIC: i.pic, Departemen: i.dept || '',
-    'SHI Dept PIC': i.shiPic || '', User: i.user || '', 'Item Order': i.item, Vendor: i.vendor,
-    'Beginning Issue': i.beginIssue || '', 'Issue Description': i.issue, Priority: i.prioritas,
-    'Issue Progress': i.progress || '', 'Target Finish Date': i.target || '',
-    'Finish Date': i.selesai ? fmtDMY(i.selesai) : '', Remark: i.ket || ''
-  }));
-
-  const wb = XLSX.utils.book_new();
-  const wsAct = XLSX.utils.json_to_sheet(actRows);
-  const wsIss = XLSX.utils.json_to_sheet(issRows);
-  XLSX.utils.book_append_sheet(wb, wsAct, 'Aktivitas Harian');
-  XLSX.utils.book_append_sheet(wb, wsIss, 'Issue Tracker');
-
-  const today = new Date().toISOString().slice(0,10);
-  XLSX.writeFile(wb, `SHI_Delegate_Backup_${today}.xlsx`);
-  toast('Backup Excel berhasil di-download');
+// ---- PIC name standardisation ----
+// Official PIC names. Any single-person entry is mapped to these by first name,
+// which fixes typos like "AGUNG SAFTONY" -> "AGUNG SAFTHONY" or "RIDWAN MAULANA" -> full name.
+const PIC_CANONICAL = ['ASEP SUPRIATNA','EULIS NURHERNANINGSIH','RIDWAN MAULANA FIRDAUS','AGUNG SAFTHONY'];
+const PIC_FIRST_MAP = { 'ASEP':'ASEP SUPRIATNA','EULIS':'EULIS NURHERNANINGSIH','RIDWAN':'RIDWAN MAULANA FIRDAUS','AGUNG':'AGUNG SAFTHONY' };
+function canonPic(name) {
+  let s = (name||'').trim().toUpperCase().replace(/\s+/g,' ');
+  if (!s) return s;
+  // Entries naming more than one person are left as-is to avoid merging two people.
+  if (/[\/&,+]|\bDAN\b/.test(s)) return s;
+  const first = s.split(' ')[0];
+  return PIC_FIRST_MAP[first] || s;
+}
+function normalizePicData() {
+  (DB.activities||[]).forEach(a => { if (a && a.pic != null) a.pic = canonPic(a.pic); });
+  (DB.issues||[]).forEach(i => { if (i && i.pic != null) i.pic = canonPic(i.pic); });
 }
 
+// ---- PIC dropdown helpers ----
+// Collect unique PIC names (UPPERCASE, canonical) — always includes the official list.
+function collectPicNames() {
+  const set = new Set(PIC_CANONICAL);
+  (DB.activities||[]).forEach(a => { const v=canonPic(a.pic); if(v) set.add(v); });
+  (DB.issues||[]).forEach(i => { const v=canonPic(i.pic); if(v) set.add(v); });
+  return [...set].sort((a,b)=>a.localeCompare(b));
+}
+function populatePicSelect(selId) {
+  const sel = document.getElementById(selId);
+  if (!sel) return;
+  const keep = sel.value;
+  const names = collectPicNames();
+  sel.innerHTML =
+    `<option value="">${t('pic_choose')}</option>` +
+    names.map(n=>`<option value="${n.replace(/"/g,'&quot;')}">${n}</option>`).join('') +
+    `<option value="__other__">${t('pic_other')}</option>`;
+  if (keep && [...sel.options].some(o=>o.value===keep)) sel.value = keep;
+}
+function onPicSelectChange(selId, otherId) {
+  const sel = document.getElementById(selId), other = document.getElementById(otherId);
+  if (!sel || !other) return;
+  const isOther = sel.value === '__other__';
+  other.style.display = isOther ? 'block' : 'none';
+  if (isOther) other.focus(); else other.value = '';
+}
+function getPicValue(selId, otherId) {
+  const sel = document.getElementById(selId), other = document.getElementById(otherId);
+  if (!sel) return '';
+  if (sel.value === '__other__') return canonPic((other?.value||'').trim());
+  return canonPic((sel.value||'').trim());
+}
+function setPicSelect(selId, otherId, value) {
+  populatePicSelect(selId);
+  const sel = document.getElementById(selId), other = document.getElementById(otherId);
+  const up = (value||'').trim().toUpperCase();
+  if (!sel) return;
+  if (up && ![...sel.options].some(o=>o.value===up)) {
+    const opt = document.createElement('option');
+    opt.value = up; opt.textContent = up;
+    sel.insertBefore(opt, sel.lastElementChild); // before the "__other__" option
+  }
+  sel.value = up || '';
+  if (other) { other.style.display = 'none'; other.value = ''; }
+}
+function resetPicField(selId, otherId) {
+  populatePicSelect(selId);
+  const sel = document.getElementById(selId); if (sel) sel.value = '';
+  const other = document.getElementById(otherId); if (other) { other.style.display = 'none'; other.value = ''; }
+}
 function g(id) { return (document.getElementById(id)?.value||''); }
 function clearForm(ids) {
   ids.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
@@ -3077,7 +3199,8 @@ function openNewActivity() {
   document.getElementById('modal-activity-title').textContent = t('modal_add_activity');
   document.getElementById('modal-activity-savebtn').textContent = t('btn_save_activity');
   document.getElementById('modal-activity-delbtn').style.display = 'none';
-  clearForm(['fa-pic','fa-dept','fa-desc','fa-remark','fa-ket']);
+  clearForm(['fa-dept','fa-desc','fa-remark','fa-ket']);
+  resetPicField('fa-pic','fa-pic-other');
   document.getElementById('fa-factory').value = '';
   document.getElementById('fa-status').value = 'In Progress';
   openModal('modal-activity');
@@ -3087,7 +3210,8 @@ function openNewIssue() {
   document.getElementById('modal-issue-title').textContent = t('modal_add_issue');
   document.getElementById('modal-issue-savebtn').textContent = t('btn_save_issue');
   document.getElementById('modal-issue-delbtn').style.display = 'none';
-  clearForm(['fi-pic','fi-dept','fi-shipic','fi-user','fi-item','fi-vendor','fi-begin','fi-issue','fi-progress','fi-target','fi-ket']);
+  clearForm(['fi-dept','fi-shipic','fi-user','fi-item','fi-vendor','fi-begin','fi-issue','fi-progress','fi-target','fi-ket']);
+  resetPicField('fi-pic','fi-pic-other');
   document.getElementById('fi-factory').value = '';
   document.getElementById('fi-prior').value = 'Medium';
   openModal('modal-issue');
