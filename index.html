@@ -1025,7 +1025,7 @@ tbody tr:hover td { background: rgba(240,242,245,.6); }
         <div class="lang-switcher-bar">
           <button class="lang-pill active" onclick="setLang('id',this,'bar')">ID</button>
           <button class="lang-pill" onclick="setLang('en',this,'bar')">EN</button>
-          <button class="lang-pill" onclick="setLang('ko',this,'bar')">KO</button>
+          <button class="lang-pill" onclick="setLang('ko',this,'bar')">KR</button>
         </div>
         <div class="pic-badge" id="pic-chip" style="display:none">
           <div class="pic-dot-green"></div>
@@ -1043,7 +1043,7 @@ tbody tr:hover td { background: rgba(240,242,245,.6); }
         <!-- ════ SECTION A: KPI CARDS (Monitoring Style) ════ -->
         <div class="mon-section-label">
           <span class="mon-section-bar"></span>
-          <span id="page-overview-kpi-label">KPI Kumulatif — Ringkasan Lapangan (JJ &amp; JJ2)</span>
+          <span id="page-overview-kpi-label" data-i18n="ov_kpi_section">KPI Kumulatif — Ringkasan Lapangan (JJ &amp; JJ2)</span>
         </div>
 
         <div class="ov-top-row">
@@ -1063,7 +1063,7 @@ tbody tr:hover td { background: rgba(240,242,245,.6); }
             </div>
             <!-- Card 3: Completion Rate -->
             <div class="mon-kpi-card">
-              <div class="mon-kpi-label">Completion Rate</div>
+              <div class="mon-kpi-label" data-i18n="kpi_completion">Completion Rate</div>
               <div class="mon-kpi-val amber" id="kpi-rate">—</div>
               <div class="mon-kpi-sub" id="kpi-rate-meta">aktivitas selesai</div>
               <div class="mon-kpi-bar-wrap"><div class="mon-kpi-bar-fill" id="kpi-rate-bar" style="background:#FFCB45;width:0%"></div></div>
@@ -1080,28 +1080,28 @@ tbody tr:hover td { background: rgba(240,242,245,.6); }
         <!-- ════ SECTION B: FACTORY PERFORMANCE ════ -->
         <div class="mon-section-label" style="margin-top:14px">
           <span class="mon-section-bar"></span>
-          <span>Performa Factory — Completed vs Total Aktivitas</span>
+          <span data-i18n="ov_factory_section">Performa Factory — Completed vs Total Aktivitas</span>
         </div>
 
         <div class="mon-row-2col" style="margin-bottom:14px">
           <!-- Left: Factory gauges + date activity bars -->
           <div class="mon-card">
-            <div class="mon-card-head">Performa Factory <span class="mon-card-head-sub">Completed / Total</span></div>
+            <div class="mon-card-head" data-i18n="ov_factory_title">Performa Factory <span class="mon-card-head-sub" data-i18n="ov_factory_sub">Completed / Total</span></div>
             <div id="factory-gauges" style="margin-top:4px"></div>
             <div class="mon-divider"></div>
-            <div class="mon-card-head" style="margin-top:4px">Aktivitas per Tanggal <span class="mon-card-head-sub">10 terakhir</span></div>
+            <div class="mon-card-head" style="margin-top:4px" data-i18n="ov_date_act">Aktivitas per Tanggal <span class="mon-card-head-sub" data-i18n="ov_date_act_sub">10 terakhir</span></div>
             <div id="date-bars-new" style="margin-top:8px"></div>
           </div>
 
           <!-- Right: Issue breakdown + resolution -->
           <div class="mon-card">
-            <div class="mon-card-head">Issue Breakdown</div>
+            <div class="mon-card-head" data-i18n="ov_issue_bd">Issue Breakdown</div>
             <div class="iss-chips" id="issue-scorecard"></div>
             <div class="mon-divider"></div>
-            <div class="mon-card-head">Tingkat Resolusi</div>
+            <div class="mon-card-head" data-i18n="ov_resolution">Tingkat Resolusi</div>
             <div style="text-align:center;padding:10px 0 6px">
               <div style="font-size:40px;font-weight:900;letter-spacing:-.03em;line-height:1" id="ov-res-pct">—%</div>
-              <div style="font-size:11px;color:var(--txt-muted);margin-top:2px">issue berhasil diselesaikan</div>
+              <div style="font-size:11px;color:var(--txt-muted);margin-top:2px" data-i18n="ov_resolution_sub">issue berhasil diselesaikan</div>
             </div>
             <div class="resolution-track" style="margin:10px 0 8px">
               <div class="resolution-fill" id="ov-res-fill" style="background:#05CD44;width:0%"></div>
@@ -1118,18 +1118,18 @@ tbody tr:hover td { background: rgba(240,242,245,.6); }
         <div class="mon-row-2col" style="margin-bottom:14px;grid-template-columns:1.15fr 0.85fr">
           <!-- Dept activity matrix -->
           <div class="mon-card">
-            <div class="mon-card-head">Aktivitas per Departemen <span class="mon-card-head-sub">JJ vs JJ2</span></div>
+            <div class="mon-card-head" data-i18n="ov_dept_act">Aktivitas per Departemen <span class="mon-card-head-sub">JJ vs JJ2</span></div>
             <div class="dept-matrix" id="dept-matrix" style="margin-top:8px"></div>
           </div>
 
           <!-- Open issues detail -->
           <div class="mon-card">
-            <div class="mon-card-head">Open Issues — Detail <span class="mon-card-head-sub" id="ov-iss-count-label">semua</span></div>
+            <div class="mon-card-head" data-i18n="ov_open_issues">Open Issues — Detail <span class="mon-card-head-sub" id="ov-iss-count-label">semua</span></div>
             <table class="mon-tbl" style="margin-top:8px">
               <thead><tr>
-                <th>Item · Vendor</th>
-                <th>Prioritas</th>
-                <th>Progress</th>
+                <th data-i18n="col_item_vendor">Item · Vendor</th>
+                <th data-i18n="col_priority2">Prioritas</th>
+                <th data-i18n="col_progress2">Progress</th>
               </tr></thead>
               <tbody id="ov-issue-heat-body"></tbody>
             </table>
@@ -1140,20 +1140,20 @@ tbody tr:hover td { background: rgba(240,242,245,.6); }
         <div class="mon-row-3col" style="margin-bottom:14px">
           <!-- Feed aktivitas terkini -->
           <div class="mon-card" style="grid-column:span 2">
-            <div class="mon-card-head">Feed Aktivitas Terkini <span class="mon-card-head-sub">5 hari terakhir</span></div>
+            <div class="mon-card-head" data-i18n="ov_feed">Feed Aktivitas Terkini <span class="mon-card-head-sub" data-i18n="ov_feed_sub">5 hari terakhir</span></div>
             <div class="feed-list" id="ov-feed" style="margin-top:8px"></div>
           </div>
 
           <!-- Top Dept leaderboard -->
           <div class="mon-card">
-            <div class="mon-card-head">Top Departemen</div>
+            <div class="mon-card-head" data-i18n="ov_top_dept">Top Departemen</div>
             <div id="ov-dept-rank" style="margin-top:8px"></div>
           </div>
         </div>
 
         <!-- ════ SECTION E: SUMMARY TABLE ════ -->
         <div class="mon-card" style="margin-bottom:14px">
-          <div class="mon-card-head">Ringkasan Aktivitas per Factory</div>
+          <div class="mon-card-head" data-i18n="ov_summary_title">Ringkasan Aktivitas per Factory</div>
           <div style="overflow-x:auto;margin-top:12px">
             <table class="summary-table">
               <thead>
@@ -1508,6 +1508,19 @@ const LANG = {
     page_overview_sub: 'JJ & JJ2 Factory — Monitoring Real-time',
     kpi_activities: 'Total Aktivitas',
     ov_pic_perf: 'Aktivitas per PIC', ov_pic_perf_sub: 'Frekuensi input per PIC',
+    ov_kpi_section: 'KPI Kumulatif — Ringkasan Lapangan (JJ & JJ2)',
+    kpi_completion: 'Completion Rate',
+    ov_factory_section: 'Performa Factory — Completed vs Total Aktivitas',
+    ov_factory_title: 'Performa Factory', ov_factory_sub: 'Completed / Total',
+    ov_date_act: 'Aktivitas per Tanggal', ov_date_act_sub: '10 terakhir',
+    ov_issue_bd: 'Issue Breakdown', ov_resolution: 'Tingkat Resolusi', ov_resolution_sub: 'issue berhasil diselesaikan',
+    ov_dept_act: 'Aktivitas per Departemen', ov_open_issues: 'Open Issues — Detail',
+    ov_top_dept: 'Top Departemen', ov_feed: 'Feed Aktivitas Terkini', ov_feed_sub: '5 hari terakhir',
+    ov_summary_title: 'Ringkasan Aktivitas per Factory',
+    col_item_vendor: 'Item · Vendor', col_priority2: 'Prioritas', col_progress2: 'Progress',
+    chip_total_issue: 'Total Issue', chip_open: 'Open', chip_resolved: 'Resolved', chip_high: 'High Priority', chip_medium: 'Medium', chip_low: 'Low',
+    w_selesai: 'selesai', w_masih_open: 'masih open', w_activities: 'aktivitas', w_dept: 'Dept', w_no_open_issue: 'Tidak ada issue open', w_all: 'semua',
+    tpl_from_total: 'dari {n} total issue', tpl_rate: '{d} dari {t} aktivitas', tpl_issue_open: '{n} issue open',
     kpi_all_factory: 'Semua factory',
     kpi_open_issues: 'Issue Open',
     kpi_not_done: 'Belum selesai',
@@ -1630,6 +1643,19 @@ const LANG = {
     page_overview_sub: 'JJ & JJ2 Factory — Real-time Monitoring',
     kpi_activities: 'Total Activities',
     ov_pic_perf: 'Activities per PIC', ov_pic_perf_sub: 'Input frequency per PIC',
+    ov_kpi_section: 'Cumulative KPI — Field Summary (JJ & JJ2)',
+    kpi_completion: 'Completion Rate',
+    ov_factory_section: 'Factory Performance — Completed vs Total Activities',
+    ov_factory_title: 'Factory Performance', ov_factory_sub: 'Completed / Total',
+    ov_date_act: 'Activities per Date', ov_date_act_sub: 'Last 10',
+    ov_issue_bd: 'Issue Breakdown', ov_resolution: 'Resolution Rate', ov_resolution_sub: 'issues resolved',
+    ov_dept_act: 'Activities per Department', ov_open_issues: 'Open Issues — Detail',
+    ov_top_dept: 'Top Departments', ov_feed: 'Recent Activity Feed', ov_feed_sub: 'Last 5 days',
+    ov_summary_title: 'Activity Summary per Factory',
+    col_item_vendor: 'Item · Vendor', col_priority2: 'Priority', col_progress2: 'Progress',
+    chip_total_issue: 'Total Issue', chip_open: 'Open', chip_resolved: 'Resolved', chip_high: 'High Priority', chip_medium: 'Medium', chip_low: 'Low',
+    w_selesai: 'done', w_masih_open: 'still open', w_activities: 'activities', w_dept: 'Dept', w_no_open_issue: 'No open issues', w_all: 'all',
+    tpl_from_total: 'of {n} total issues', tpl_rate: '{d} of {t} activities', tpl_issue_open: '{n} open issues',
     kpi_all_factory: 'All factories',
     kpi_open_issues: 'Open Issues',
     kpi_not_done: 'Not yet resolved',
@@ -1752,6 +1778,19 @@ const LANG = {
     page_overview_sub: 'JJ & JJ2 공장 — 실시간 모니터링',
     kpi_activities: '총 활동',
     ov_pic_perf: 'PIC별 활동', ov_pic_perf_sub: 'PIC별 입력 빈도',
+    ov_kpi_section: '누적 KPI — 현장 요약 (JJ & JJ2)',
+    kpi_completion: '완료율',
+    ov_factory_section: '공장 성과 — 완료 vs 총 활동',
+    ov_factory_title: '공장 성과', ov_factory_sub: '완료 / 총계',
+    ov_date_act: '날짜별 활동', ov_date_act_sub: '최근 10개',
+    ov_issue_bd: '이슈 분석', ov_resolution: '해결률', ov_resolution_sub: '이슈 해결 완료',
+    ov_dept_act: '부서별 활동', ov_open_issues: '미해결 이슈 — 상세',
+    ov_top_dept: '상위 부서', ov_feed: '최근 활동 피드', ov_feed_sub: '최근 5일',
+    ov_summary_title: '공장별 활동 요약',
+    col_item_vendor: '품목 · 공급업체', col_priority2: '우선순위', col_progress2: '진행',
+    chip_total_issue: '총 이슈', chip_open: '미해결', chip_resolved: '해결됨', chip_high: '높음', chip_medium: '보통', chip_low: '낮음',
+    w_selesai: '완료', w_masih_open: '미해결', w_activities: '활동', w_dept: '부서', w_no_open_issue: '미해결 이슈 없음', w_all: '전체',
+    tpl_from_total: '총 {n}개 이슈 중', tpl_rate: '{t}개 중 {d}개 완료', tpl_issue_open: '미해결 {n}건',
     kpi_all_factory: '모든 공장',
     kpi_open_issues: '미해결 이슈',
     kpi_not_done: '미완료',
@@ -1879,12 +1918,12 @@ function setLang(lang, btn, source) {
       if (b.textContent.includes(lang === 'id' ? 'Indonesia' : lang === 'en' ? 'English' : '한국어')) b.classList.add('active');
     });
     document.querySelectorAll('.lang-pill').forEach(b => {
-      if (b.textContent.trim() === lang.toUpperCase()) b.classList.add('active');
+      if (b.textContent.trim() === (lang==='ko'?'KR':lang.toUpperCase())) b.classList.add('active');
     });
   } else {
     btn.classList.add('active');
     document.querySelectorAll('.lang-pill').forEach(b => {
-      if (b.textContent.trim() === lang.toUpperCase()) b.classList.add('active');
+      if (b.textContent.trim() === (lang==='ko'?'KR':lang.toUpperCase())) b.classList.add('active');
     });
   }
 
@@ -2228,9 +2267,9 @@ function renderKPI() {
 
   // meta text
   const openMeta = document.getElementById('kpi-open-meta');
-  if (openMeta) openMeta.textContent = `dari ${total} total issue`;
+  if (openMeta) openMeta.textContent = t('tpl_from_total').replace('{n}', total);
   const rateMeta = document.getElementById('kpi-rate-meta');
-  if (rateMeta) rateMeta.textContent = `${done} dari ${DB.activities.length} aktivitas`;
+  if (rateMeta) rateMeta.textContent = t('tpl_rate').replace('{d}', done).replace('{t}', DB.activities.length);
 
   // mini bars (legacy — now in mon-kpi-bar-wrap)
   const openBar = document.getElementById('kpi-open-bar');
@@ -2318,12 +2357,12 @@ function renderIssueScorecard() {
   const low = DB.issues.filter(i => /low/i.test(i.prioritas)).length;
 
   document.getElementById('issue-scorecard').innerHTML = [
-    { label: 'Total Issue',  num: total,    color: 'var(--mon-blue)' },
-    { label: 'Open',         num: open,     color: 'var(--c-bad)' },
-    { label: 'Resolved',     num: resolved, color: '#059669' },
-    { label: 'High Priority',num: high,     color: '#E31A1A' },
-    { label: 'Medium',       num: medium,   color: '#D97706' },
-    { label: 'Low',          num: low,      color: '#059669' },
+    { label: t('chip_total_issue'),  num: total,    color: 'var(--mon-blue)' },
+    { label: t('chip_open'),         num: open,     color: 'var(--c-bad)' },
+    { label: t('chip_resolved'),     num: resolved, color: '#059669' },
+    { label: t('chip_high'),num: high,     color: '#E31A1A' },
+    { label: t('chip_medium'),       num: medium,   color: '#D97706' },
+    { label: t('chip_low'),          num: low,      color: '#059669' },
   ].map(s => `
     <div class="iss-chip">
       <div class="iss-chip-label">${s.label}</div>
@@ -2343,9 +2382,9 @@ function renderResolutionNew() {
   const fill = document.getElementById('ov-res-fill');
   if (fill) { fill.style.width = rate + '%'; fill.style.background = color; }
   const done = document.getElementById('ov-res-done');
-  if (done) done.textContent = `✓ ${resolved} selesai`;
+  if (done) done.textContent = `✓ ${resolved} ${t('w_selesai')}`;
   const openEl = document.getElementById('ov-res-open');
-  if (openEl) openEl.textContent = `${open} masih open`;
+  if (openEl) openEl.textContent = `${open} ${t('w_masih_open')}`;
 
   // Priority mini breakdown
   const prios = [
@@ -2391,7 +2430,7 @@ function renderFactoryGauges() {
             ${rate > 15 ? rate + '%' : ''}
           </div>
         </div>
-        <div class="gauge-side">${done}/${acts.length} selesai</div>
+        <div class="gauge-side">${done}/${acts.length} ${t('w_selesai')}</div>
       </div>`;
   }).join('');
 }
@@ -2440,11 +2479,11 @@ function renderDateBarsNew() {
 function renderOvIssueHeat() {
   const openIss = DB.issues.filter(isOpenIssue).slice().sort((a,b)=>dateKey(b.tanggal).localeCompare(dateKey(a.tanggal)));
   const label = document.getElementById('ov-iss-count-label');
-  if (label) label.textContent = `${openIss.length} issue open`;
+  if (label) label.textContent = t('tpl_issue_open').replace('{n}', openIss.length);
   const tbody = document.getElementById('ov-issue-heat-body');
   if (!tbody) return;
   if (!openIss.length) {
-    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--txt-muted);font-size:12px">Tidak ada issue open</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="3" style="text-align:center;padding:20px;color:var(--txt-muted);font-size:12px">${t('w_no_open_issue')}</td></tr>`;
     return;
   }
   tbody.innerHTML = openIss.map(iss => {
@@ -2487,8 +2526,8 @@ function renderOvFeed() {
         </div>
         <div class="feed-line"></div>
         <div class="feed-body">
-          <div class="feed-title">${factories.map(f=>`<span class="factory-pill ${f.toLowerCase()}" style="font-size:9px;padding:1px 6px">${f}</span>`).join(' ')} <span style="font-size:12px;font-weight:700;margin-left:4px">${acts.length} aktivitas</span></div>
-          <div class="feed-sub">Dept: ${deptsText}</div>
+          <div class="feed-title">${factories.map(f=>`<span class="factory-pill ${f.toLowerCase()}" style="font-size:9px;padding:1px 6px">${f}</span>`).join(' ')} <span style="font-size:12px;font-weight:700;margin-left:4px">${acts.length} ${t('w_activities')}</span></div>
+          <div class="feed-sub">${t('w_dept')}: ${deptsText}</div>
         </div>
         <div class="feed-count">${acts.length}</div>
       </div>`;
